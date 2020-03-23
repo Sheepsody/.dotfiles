@@ -8,22 +8,25 @@ Plugin 'VundleVim/Vundle.vim'
 
 Plugin 'dense-analysis/ale'
 Plugin 'preservim/nerdtree'
-Plugin 'Valloric/YouCompleteMe'
 Plugin 'vim-syntastic/syntastic'
 Plugin 'tpope/vim-fugitive'
+Plugin 'neoclide/coc.nvim'
 
 Plugin 'vim-airline/vim-airline'
 
-Plugin 'arcticicestudio/nord-vim'
+Plugin 'sickill/vim-monokai'
 
 Plugin 'octol/vim-cpp-enhanced-highlight'
 
 Plugin 'rust-lang/rust.vim'
-Plugin 'racer-rust/vim-racer'
+
+Plugin 'sheerun/vim-polyglot'
 
 call vundle#end()            " required
 
-colorscheme nord
+call coc#util#install()
+
+colorscheme monokai
 
 filetype plugin indent on    " required
 syntax on
