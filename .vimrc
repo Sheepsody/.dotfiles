@@ -4,24 +4,38 @@ filetype off                  " required
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
+" Plugin manager
 Plugin 'VundleVim/Vundle.vim'
 
-Plugin 'dense-analysis/ale'
+" Basic plugins
 Plugin 'preservim/nerdtree'
-Plugin 'vim-syntastic/syntastic'
+Plugin 'junegunn/fzf'
+Plugin 'junegunn/fzf.vim'
+Plugin 'kien/ctrlp.vim'
+Plugin 'preservim/nerdcommenter'
+Plugin 'jiangmiao/auto-pairs'
 Plugin 'tpope/vim-fugitive'
-Plugin 'neoclide/coc.nvim'
-
 Plugin 'vim-airline/vim-airline'
 
-Plugin 'tomasr/molokai'
+" Dense analysis
+Plugin 'dense-analysis/ale'
 
+" Intellisence
+Plugin 'neoclide/coc.nvim'
+
+" Colorscheme & syntax
+Plugin 'tomasr/molokai'
+Plugin 'sheerun/vim-polyglot'
+
+" Snippets are separated from the engine. Add this if you want them:
+Plugin 'honza/vim-snippets'
+
+" C++ configuration
 Plugin 'octol/vim-cpp-enhanced-highlight'
 Plugin 'rhysd/vim-clang-format'
 
+" Rust configuration
 Plugin 'rust-lang/rust.vim'
-
-Plugin 'sheerun/vim-polyglot'
 
 call vundle#end()            " required
 
@@ -29,6 +43,9 @@ colorscheme molokai
 
 filetype plugin indent on    " required
 syntax on
+
+" Global clipboard
+set clipboard=unnamed
 
 let g:airline_powerline_fonts = 1
 
@@ -64,4 +81,3 @@ set updatetime=300
 
 " Use <c-space> to trigger completion.
 inoremap <silent><expr> <c-space> coc#refresh()
-
