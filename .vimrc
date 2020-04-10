@@ -17,10 +17,16 @@ Plugin 'jiangmiao/auto-pairs'
 Plugin 'tpope/vim-fugitive'
 Plugin 'vim-airline/vim-airline'
 
-" Dense analysis
+" Markdown syntax, matching and mapping
+Plugin 'godlygeek/tabular'
+Plugin 'plasticboy/vim-markdown'
+
+" Dense analysis 
+" Used for error checking, fixing and linting
 Plugin 'dense-analysis/ale'
 
-" Intellisence
+" Conquer of Completion
+" Used for Autocompletion
 Plugin 'neoclide/coc.nvim'
 
 " Colorscheme & syntax
@@ -54,6 +60,7 @@ syntax on
 
 " Global clipboard
 set clipboard=unnamed
+let mapleader=","
 
 " Folding configuration
 set foldmethod=indent
@@ -63,11 +70,8 @@ set foldlevel=2
 
 let g:airline_powerline_fonts = 1
 
+let g:rustfmt_autosave = 1
 let g:ale_linters = {'cpp': ['clang']}
-
-" If RUST_SRC_PATH or RACER (on $PATH) not defined
-" let g:racer_cmd="/Users/danirod/.cargo/bin/racer"
-" let $RUST_SRC_PATH="/home/VVialard/Developer/rust-master/src"
 
 let g:ycm_rust_src_path="/home/VVialard/Developer/rust-master/src/"
 
@@ -87,6 +91,9 @@ imap <C-k> <Esc>:tabnext<CR>i
 :  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
 :  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
 :augroup END
+
+let g:ale_sign_error = '✘'
+let g:ale_sign_warning = '⚠'
 
 " Some servers have issues with backups
 set nobackup
@@ -150,3 +157,20 @@ command! -nargs=? Fold :call     CocAction('fold', <f-args>)
 
 " Add `:OR` command for organize imports of the current buffer.
 command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
+
+set conceallevel=2
+let g:vim_markdown_math = 1
+let g:vim_markdown_frontmatter = 1
+let g:vim_markdown_toml_frontmatter = 1
+let g:vim_markdown_json_frontmatter = 1
+let g:vim_markdown_strikethrough = 1
+
+" Format with nvim
+nmap <leader>f  <Plug>(coc-format-selected)
+vmap <leader>f  <Plug>(coc-format-selected)
+
+let g:ale_fixers = {
+\  'javascript': ['eslint'],
+\  'python': ['autopep8'],
+\}
+let g:ale_fix_on_save = 1
