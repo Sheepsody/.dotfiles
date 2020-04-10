@@ -17,10 +17,16 @@ Plugin 'jiangmiao/auto-pairs'
 Plugin 'tpope/vim-fugitive'
 Plugin 'vim-airline/vim-airline'
 
-" Dense analysis
+" Markdown syntax, matching and mapping
+Plugin 'godlygeek/tabular'
+Plugin 'plasticboy/vim-markdown'
+
+" Dense analysis 
+" Used for error checking, fixing and linting
 Plugin 'dense-analysis/ale'
 
-" Intellisence
+" Conquer of Completion
+" Used for Autocompletion
 Plugin 'neoclide/coc.nvim'
 
 " Colorscheme & syntax
@@ -46,12 +52,11 @@ syntax on
 
 " Global clipboard
 set clipboard=unnamed
+let mapleader=","
 
 let g:airline_powerline_fonts = 1
 
-" If RUST_SRC_PATH or RACER (on $PATH) not defined
-" let g:racer_cmd="/Users/danirod/.cargo/bin/racer"
-" let $RUST_SRC_PATH="/home/VVialard/Developer/rust-master/src"
+let g:rustfmt_autosave = 1
 
 let g:ycm_rust_src_path="/home/VVialard/Developer/rust-master/src/"
 
@@ -72,6 +77,9 @@ imap <C-k> <Esc>:tabnext<CR>i
 :  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
 :augroup END
 
+let g:ale_sign_error = '✘'
+let g:ale_sign_warning = '⚠'
+
 " Some servers have issues with backups
 set nobackup
 set nowritebackup
@@ -81,3 +89,21 @@ set updatetime=300
 
 " Use <c-space> to trigger completion.
 inoremap <silent><expr> <c-space> coc#refresh()
+
+" Add conceraling
+set conceallevel=2
+let g:vim_markdown_math = 1
+let g:vim_markdown_frontmatter = 1
+let g:vim_markdown_toml_frontmatter = 1
+let g:vim_markdown_json_frontmatter = 1
+let g:vim_markdown_strikethrough = 1
+
+" Format with nvim
+nmap <leader>f  <Plug>(coc-format-selected)
+vmap <leader>f  <Plug>(coc-format-selected)
+
+let g:ale_fixers = {
+\  'javascript': ['eslint'],
+\  'python': ['autopep8'],
+\}
+let g:ale_fix_on_save = 1
