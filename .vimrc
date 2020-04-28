@@ -53,6 +53,8 @@ colorscheme molokai
 let g:coc_global_extensions = [
 			\ 'coc-tsserver',
 			\ 'coc-eslint',
+			\ 'coc-python',
+			\ 'coc-clangd',
 			\ ]
 
 filetype plugin indent on    " required
@@ -60,7 +62,7 @@ syntax on
 
 " Global clipboard
 set clipboard=unnamed
-let mapleader=","
+let mapleader="\\"
 
 " Folding configuration
 set foldmethod=indent
@@ -71,7 +73,10 @@ set foldlevel=2
 let g:airline_powerline_fonts = 1
 
 let g:rustfmt_autosave = 1
-let g:ale_linters = {'cpp': ['clang']}
+let g:ale_linters = {
+			\ 'cpp': ['clang'],
+			\ 'python': ['pylint']
+			\ }
 
 let g:ycm_rust_src_path="/home/VVialard/Developer/rust-master/src/"
 
