@@ -51,6 +51,7 @@ call vundle#end()            " required
 colorscheme molokai
 
 let g:coc_global_extensions = [
+			\ 'coc-dictionary',
 			\ 'coc-tsserver',
 			\ 'coc-eslint',
 			\ 'coc-python',
