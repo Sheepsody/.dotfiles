@@ -28,6 +28,8 @@ plugins=(
         fzf
         git
         kubectl
+        cargo
+        docker
 )
 
 alias vim="nvim"
@@ -39,6 +41,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
-export PATH=$PATHexport PATH=$PATH:/usr/local/go/bin
+export PATH=$PATH
+export PATH=$PATH:/usr/local/go/bin
 
 export XDG_CURRENT_DESKTOP=GNOME 

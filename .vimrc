@@ -115,8 +115,6 @@ let mapleader="\\"
 
 let g:airline_powerline_fonts = 1
 
-let g:ycm_rust_src_path="/home/VVialard/Developer/rust-master/src/"
-
 "" Bindings to switch between tabs
 map <C-j> :tabprevious<CR>
 nmap <C-j> :tabprevious<CR>
