@@ -87,7 +87,7 @@ bindsym $super+Shift+l exec i3lock-fancy -g -f Comic-Sans-MS -- scrot -z
 bindsym $super+Shift+h exec i3lock-fancy -g -f Comic-Sans-MS -- scrot -z & systemctl hibernate
 
 # Change Keyboard Layout
-bindsym $super+space exec /home/sheepsody/.config/i3/i3-keyboard-layout cycle fr gb jp
+bindsym $super+space exec /home/sheepsody/.config/i3/i3-keyboard-layout cycle 
 
 # exit i3
 bindcode $super+Shift+26 exec "i3-nagbar -t warning -m 'Really, exit?' -b 'Yes' 'i3-msg exit'"
