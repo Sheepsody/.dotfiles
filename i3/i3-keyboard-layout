@@ -9,14 +9,14 @@ get_kbdlayout() {
 }
 
 set_kbdlayout() {
-  eval "array=($1)"
+  eval "array=($@)"
   setxkbmap "${array[@]}"
   pgrep i3status | xargs --no-run-if-empty kill -s USR1 # tell i3status to update
 }
 
 cycle() {
   current_layout=$(get_kbdlayout | xargs)
-  layouts=("$@" "$1") # add the first one at the end so that it cycles
+  layouts=("fr" "gb" "jp" "fr bepo" "fr") # add the first one at the end so that it cycles
   index=0
   while [ "${layouts[$index]}" != "$current_layout" ] && [ $index -lt "${#layouts[@]}" ]; do index=$[index +1]; done
   next_index=$[index +1]
@@ -41,7 +41,7 @@ case $subcommand in
     echo -n $(get_kbdlayout)
     ;;
   "set")
-    set_kbdlayout "$1"
+    set_kbdlayout "$@"
     ;;
   "cycle")
     cycle "$@"
