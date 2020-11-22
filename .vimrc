@@ -1,65 +1,51 @@
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-
-" Plugin manager
-Plugin 'VundleVim/Vundle.vim'
+call plug#begin('~/.vim/plugged')
 
 " Basic plugins
-Plugin 'preservim/nerdtree'
-Plugin 'junegunn/fzf' " Install the_silver_searcher
-Plugin 'junegunn/fzf.vim'
-Plugin 'kien/ctrlp.vim'
-Plugin 'preservim/nerdcommenter'
-Plugin 'jiangmiao/auto-pairs'
-Plugin 'tpope/vim-fugitive'
-Plugin 'vim-airline/vim-airline'
-Plugin 'sjl/gundo.vim'
+Plug 'preservim/nerdtree'
+Plug 'junegunn/fzf' " Install the_silver_searcher
+Plug 'junegunn/fzf.vim'
+Plug 'kien/ctrlp.vim'
+Plug 'preservim/nerdcommenter'
+Plug 'jiangmiao/auto-pairs'
+Plug 'tpope/vim-fugitive'
+Plug 'vim-airline/vim-airline'
+Plug 'sjl/gundo.vim'
 
 " Markdown syntax, matching and mapping
-Plugin 'godlygeek/tabular'
-Plugin 'plasticboy/vim-markdown'
-
-" Dense analysis 
-" Used for error checking, fixing and linting
-Plugin 'dense-analysis/ale'
+Plug 'godlygeek/tabular'
+Plug 'plasticboy/vim-markdown'
 
 " Conquer of Completion
 " Used for Autocompletion
-Plugin 'neoclide/coc.nvim'
+Plug 'neoclide/coc.nvim', { 'branch': 'master', 'do': 'yarn install --frozen-lockfile' }
 
 " Colorscheme & syntax
-Plugin 'tomasr/molokai'
-Plugin 'sheerun/vim-polyglot'
+Plug 'tomasr/molokai'
+Plug 'sheerun/vim-polyglot'
 
 " Snippets are separated from the engine. Add this if you want them:
-Plugin 'honza/vim-snippets'
-Plugin 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
+Plug 'SirVer/ultisnips'
 
 " C++ configuration
-Plugin 'octol/vim-cpp-enhanced-highlight'
-Plugin 'rhysd/vim-clang-format'
+Plug 'octol/vim-cpp-enhanced-highlight'
+Plug 'rhysd/vim-clang-format'
 
 " Rust configuration
-Plugin 'rust-lang/rust.vim'
+Plug 'rust-lang/rust.vim'
 
-
-call vundle#end()            " required
+call plug#end()            " required
 
 colorscheme molokai 
 
-let g:coc_global_extensions = [
-			\ 'coc-dictionary',
-			\ 'coc-tsserver',
-			\ 'coc-eslint',
-			\ 'coc-python',
-			\ 'coc-clangd',
-			\ ]
-
 filetype plugin indent on    " required
 syntax on
+
+" Leader
+let mapleader=" "
 
 " Tab behaviour
 set tabstop=4
@@ -94,9 +80,6 @@ set foldmethod=indent
 nnoremap j gj
 nnoremap k gk
 
-" Leader
-let mapleader=","
-
 " toggle gundo
 nnoremap <leader>u :GundoToggle<CR>
 
@@ -111,7 +94,6 @@ endif
 
 " Global clipboard
 set clipboard=unnamed
-let mapleader="\\"
 
 let g:airline_powerline_fonts = 1
 
@@ -173,23 +155,18 @@ function! s:show_documentation()
   endif
 endfunction
 
+let g:coc_global_extensions = [
+			\ 'coc-dictionary',
+			\ 'coc-tsserver',
+			\ 'coc-eslint',
+			\ 'coc-python',
+			\ 'coc-clangd',
+			\ 'coc-rls',
+			\ 'coc-texlab',
+			\ ]
+
 " Symbol renaming.
 nmap <leader>rn <Plug>(coc-rename)
-
-" Formatting selected code.
-xmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
-
-augroup mygroup
-  autocmd!
-  " Setup formatexpr specified filetype(s).
-  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
-  " Update signature help on jump placeholder.
-  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
-augroup end
-
-" Add `:Format` command to format current buffer.
-command! -nargs=0 Format :call CocAction('format')
 
 " Add `:Fold` command to fold current buffer.
 command! -nargs=? Fold :call     CocAction('fold', <f-args>)
@@ -205,21 +182,18 @@ let g:vim_markdown_json_frontmatter = 1
 let g:vim_markdown_strikethrough = 1
 let g:vim_markdown_new_list_item_indent = 2
 
-" Format with nvim
-nmap <leader>f  <Plug>(coc-format-selected)
-vmap <leader>f  <Plug>(coc-format-selected)
-
 let g:ale_linters = { 
 			\ 'rust' : ['rustc', 'rls'],
 			\ 'python': ['pylint'],
-			\}
+\}
 
 let g:ale_fixers = {
 \  'javascript': ['eslint'],
 \  'python': ['autopep8'],
 \  'rust': ['rustfmt']
 \}
+
 let g:ale_fix_on_save = 1
 let g:ale_python_pylint_executable = 'python3'
 let g:ale_python_pylint_use_global = 1
-let g:ale_completion_enabled = 1
+let g:ale_completion_enabled = 0
