@@ -28,7 +28,7 @@ i3status() {
   while :
   do
     read line
-    block="{\"markup\":\"pango\", \"full_text\":\"<span background='#8FBCBB'> ¶ $(get_kbdlayout)</span>\"}"
+    block="{\"markup\":\"pango\", \"full_text\":\"<span background='#8FBCBB'> ¶ $(get_kbdlayout) </span>\"}"
     echo "${line/\[\{/\[$block,\{}"|| exit 1
   done
 }

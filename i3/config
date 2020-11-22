@@ -1,5 +1,6 @@
 # set modifier
 set $super Mod4
+set $screen 'intel_backlight'
 
 # set font
 font pango: Noto Sans 8
@@ -11,6 +12,8 @@ bindsym $super+Return exec i3-sensible-terminal
 exec --no-startup-id feh --randomize --bg-fill ./Pictures/Wallpapers/*
 exec --no-startup-id xsettingsd &
 exec --no-startup-id compton -b
+exec --no-startup-id ibus-daemon --xim -d -r
+exec --no-startup-id todoist &
 
 # start dmenu (a program launcher)
 bindsym $super+Shift+d exec i3-dmenu-desktop --dmenu="dmenu -i -fn 'Noto Sans:size=8'"
@@ -33,6 +36,11 @@ bindsym XF86AudioNext exec mpc next
 bindsym XF86AudioPrev exec mpc prev
 bindsym XF86AudioPlay exec mpc toggle
 bindsym XF86AudioStop exec mpc stop
+
+# Brightness 
+# Using brightnessctl to control hardware level brightness
+bindsym XF86MonBrightnessUp exec /home/sheepsody/.config/i3/brightness + eDP-1-1
+bindsym XF86MonBrightnessDown exec /home/sheepsody/.config/i3/brightness - eDP-1-1
 
 # kill focused window
 bindcode $super+Shift+24 kill
@@ -61,9 +69,6 @@ bindsym $super+e layout toggle split
 bindsym $super+s layout stacking
 bindsym $super+w layout tabbed
 
-# change focus between tiling / floating windows
-bindsym $super+Shift+space focus mode_toggle
-
 # switch to workspace
 bindsym $super+1 workspace 1
 bindsym $super+2 workspace 2
@@ -87,7 +92,7 @@ bindsym $super+Shift+l exec i3lock-fancy -g -f Comic-Sans-MS -- scrot -z
 bindsym $super+Shift+h exec i3lock-fancy -g -f Comic-Sans-MS -- scrot -z & systemctl hibernate
 
 # Change Keyboard Layout
-bindsym $super+space exec /home/sheepsody/.config/i3/i3-keyboard-layout cycle 
+bindsym $super+Shift+space exec /home/sheepsody/.config/i3/i3-keyboard-layout cycle 
 
 # exit i3
 bindcode $super+Shift+26 exec "i3-nagbar -t warning -m 'Really, exit?' -b 'Yes' 'i3-msg exit'"
@@ -118,7 +123,7 @@ bar {
         inactive_workspace      #2f343f #2f343f #d8dee8
         urgent_workspacei       #2f343f #ebcb8b #2f343f
     }
-    status_command i3status | /home/sheepsody/.config/i3/i3-keyboard-layout i3status
+    status_command i3status | /home/sheepsody/.config/i3/i3-keyboard-layout i3status | /home/sheepsody/.config/i3/get_brightness
 }
 
 # colour of border, background, text, indicator, and child_border
