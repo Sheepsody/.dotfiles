@@ -55,13 +55,14 @@
 
 ;; Org Configuration
 
-(setq org-directory (expand-file-name "~/Dropbox/Org"))
 
 (after! org
-  (setq org-default-notes-file (concat org-directory "~/Dropbox/Org/inbox.org"))
+  (setq org-directory (expand-file-name "~/Dropbox/Org/"))
+  (setq org-default-notes-file (concat org-directory "inbox.org"))
   (setq org-agenda-files '("~/Dropbox/Org/inbox.org"
                            "~/Dropbox/Org/tickler.org"
                            "~/Dropbox/Org/gtd.org"))
+  (setq org-archive-location (concat org-directory "archived.org::"))
   (setq org-capture-templates
         '(("t" "Todo [inbox]" entry
            (file+headline "~/Dropbox/Org/inbox.org" "Tasks")
@@ -75,8 +76,7 @@
         '(("TODO"  :foreground "#ffcb6b" :weight normal :underline t)
           ("WAITING" :foreground "#b2ccd6" :weight normal :underline t)
           ("DONE" :foreground "#c3e88d" :weight normal :underline t)
-          ("CANCELLED" :foreground "#ff5370" :weight normal :underline t))
-        ))
+          ("CANCELLED" :foreground "#ff5370" :weight normal :underline t))))
 
 ;; Rust configutation
 
@@ -121,3 +121,13 @@
   (eldoc-mode +1)
   (tide-hl-identifier-mode +1)
   (company-mode +1))
+
+;; Open org files on startup
+
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (find-file "~/Dropbox/Org/gtd.org")
+            (split-window-horizontally)
+            (find-file-other-window (concat org-directory "inbox.org"))
+            (split-window-vertically)
+            (find-file-other-window (concat org-directory "someday.org"))))
