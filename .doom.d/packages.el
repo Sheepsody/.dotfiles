@@ -7,3 +7,7 @@
 (package! prettier-js)
 (package! js2-mode)
 (package! rjsx-mode)
+
+;; Org Mode extensions
+
+(package! org-super-agenda)

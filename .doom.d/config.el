@@ -71,9 +71,10 @@
            (file+headline "~/Dropbox/Org/tickler.org" "Tickler")
            "* %i%? \n %U")))
   (setq org-todo-keywords
-        '((sequence "TODO(t)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+        '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
   (setq org-todo-keyword-faces
         '(("TODO"  :foreground "#ffcb6b" :weight normal :underline t)
+          ("NEXT" :foreground "#40E0D0" :weight normal :underline t)
           ("WAITING" :foreground "#b2ccd6" :weight normal :underline t)
           ("DONE" :foreground "#c3e88d" :weight normal :underline t)
           ("CANCELLED" :foreground "#ff5370" :weight normal :underline t))))
@@ -122,12 +123,65 @@
   (tide-hl-identifier-mode +1)
   (company-mode +1))
 
+;; Org Super Agenda & Custom views
+
+(use-package! org-super-agenda
+  :commands (org-super-agenda-mode))
+
+(after! org-agenda
+  :init
+  (setq org-agenda-skip-scheduled-if-done t
+        org-agenda-skip-deadline-if-done t
+        org-agenda-include-deadlines t
+        org-agenda-block-separator nil
+        org-agenda-compact-blocks t
+        org-agenda-start-day nil ;; i.e. today
+        org-agenda-span 3
+        org-agenda-start-on-weekday nil)
+
+  (setq org-agenda-custom-commands
+        '(("z" "Custom GTD view"
+           ((agenda "" ((org-agenda-overriding-header "")
+                        (org-super-agenda-groups
+                         '((:name "Today"
+                            :time-grid t
+                            :date today
+                            :order 1)))))
+            (alltodo "" ((org-agenda-overriding-header "")
+                         (org-super-agenda-groups
+                          '((:name "Next to do"
+                             :todo "NEXT"
+                             :order 1)
+                            (:name "Important"
+                             :tag "Important"
+                             :priority "A"
+                             :order 6)
+                            (:name "Due Today"
+                             :deadline today
+                             :order 2)
+                            (:name "Due Soon"
+                             :deadline future
+                             :order 8)
+                            (:name "To do"
+                             :todo "TODO"
+                             :order 20)
+                            (:name "To read"
+                             :tag "read"
+                             :order 30)
+                            (:name "Waiting"
+                             :todo "WAITING"
+                             :order 20)
+                            ))))))))
+  :config
+  (org-super-agenda-mode))
+
 ;; Open org files on startup
 
 (add-hook 'emacs-startup-hook
           (lambda ()
-            (find-file "~/Dropbox/Org/gtd.org")
+            (find-file "~/Dropbox/Org/someday.org")
+            (org-agenda nil "z")
             (split-window-horizontally)
             (find-file-other-window (concat org-directory "inbox.org"))
             (split-window-vertically)
-            (find-file-other-window (concat org-directory "someday.org"))))
+            (find-file-other-window (concat org-directory "gtd.org"))))
