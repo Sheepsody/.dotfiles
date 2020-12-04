@@ -1,8 +1,8 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
 ;; Personal information
-(setq user-full-name "John Doe"
-      user-mail-address "john@doe.com")
+(setq user-full-name "Victor Vialard"
+      user-mail-address "vvialard@hotmail.fr")
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
@@ -136,7 +136,7 @@
         org-agenda-block-separator nil
         org-agenda-compact-blocks t
         org-agenda-start-day nil ;; i.e. today
-        org-agenda-span 3
+        org-agenda-span 1
         org-agenda-start-on-weekday nil)
 
   (setq org-agenda-custom-commands
@@ -162,15 +162,18 @@
                             (:name "Due Soon"
                              :deadline future
                              :order 8)
+                            (:name "Overdue"
+                             :deadline past
+                             :order 7)
+                            (:name "To read"
+                             :tag "read"
+                             :order 10)
                             (:name "To do"
                              :todo "TODO"
                              :order 20)
-                            (:name "To read"
-                             :tag "read"
-                             :order 30)
                             (:name "Waiting"
                              :todo "WAITING"
-                             :order 20)
+                             :order 30)
                             ))))))))
   :config
   (org-super-agenda-mode))

@@ -45,3 +45,5 @@ export PATH=$PATH
 export PATH=$PATH:/usr/local/go/bin
 
 export XDG_CURRENT_DESKTOP=GNOME 
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
