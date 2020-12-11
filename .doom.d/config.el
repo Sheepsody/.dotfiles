@@ -48,6 +48,9 @@
   (setq company-show-numbers t)
   (add-hook 'evil-normal-state-entry-hook #'company-abort)) ;; make aborting less annoying.
 
+;; Language config
+
+(setq ispell-dictionary "francais")
 
 ;; Relative numbers by default
 
@@ -55,9 +58,10 @@
 
 ;; Org Configuration
 
+(setq org-directory (expand-file-name "~/Dropbox/Org/"))
+(setq org-image-actual-width '(600))
 
 (after! org
-  (setq org-directory (expand-file-name "~/Dropbox/Org/"))
   (setq org-default-notes-file (concat org-directory "inbox.org"))
   (setq org-agenda-files '("~/Dropbox/Org/inbox.org"
                            "~/Dropbox/Org/tickler.org"
@@ -152,31 +156,44 @@
                           '((:name "Next to do"
                              :todo "NEXT"
                              :order 1)
-                            (:name "Important"
-                             :tag "Important"
-                             :priority "A"
-                             :order 6)
                             (:name "Due Today"
                              :deadline today
                              :order 2)
-                            (:name "Due Soon"
-                             :deadline future
-                             :order 8)
+                            (:name "Important"
+                             :tag "Important"
+                             :priority "A"
+                             :order 3)
                             (:name "Overdue"
                              :deadline past
+                             :order 4)
+                            (:name "Due Soon"
+                             :deadline future
+                             :order 5)
+                            (:name "Less important"
+                             :priority "B"
                              :order 7)
+                            (:name "Trivial"
+                             :tag "trivial"
+                             :priority<= "C"
+                             :order 30)
                             (:name "Courses"
                              :tag "course"
                              :order 9)
                             (:name "To read"
                              :tag "read"
                              :order 10)
+                            (:name "Shopping"
+                             :tag "shop"
+                             :order 11)
+                            (:name "Courses"
+                             :tag "course"
+                             :order 12)
                             (:name "To do"
                              :todo "TODO"
                              :order 20)
                             (:name "Waiting"
                              :todo "WAITING"
-                             :order 30)
+                             :order 25)
                             ))))))))
   :config
   (org-super-agenda-mode))
@@ -185,12 +202,16 @@
 
 (add-hook 'emacs-startup-hook
           (lambda ()
-            (find-file "~/Dropbox/Org/someday.org")
+            (find-file "~/Dropbox/Org//someday.org")
             (org-agenda nil "z")
             (split-window-horizontally)
             (find-file-other-window (concat org-directory "inbox.org"))
             (split-window-vertically)
             (find-file-other-window (concat org-directory "gtd.org"))))
+
+;; Org Roam configuration
+
+(setq org-roam-directory (concat org-directory "Roam"))
 
 ;; Python Environnements
 
@@ -203,8 +224,8 @@
   ;; Set correct Python interpreter
   (setq pyvenv-post-activate-hooks
         #'(lambda ()
-          (call-interactively #'lsp-workspace-restart)
-          (setq python-shell-interpreter (concat pyvenv-virtual-env "bin/python3"))))
+            (call-interactively #'lsp-workspace-restart)
+            (setq python-shell-interpreter (concat pyvenv-virtual-env "bin/python3"))))
   (setq pyvenv-post-deactivate-hooks
         (list (lambda ()
                 (setq python-shell-interpreter "python3")))))
