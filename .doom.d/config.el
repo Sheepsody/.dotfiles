@@ -153,22 +153,25 @@
                             :order 1)))))
             (alltodo "" ((org-agenda-overriding-header "")
                          (org-super-agenda-groups
-                          '((:name "Next to do"
-                             :todo "NEXT"
+                          '((:name "Immediatly"
+                             :and (:priority "A" :todo "NEXT")
                              :order 1)
+                            (:name "Next to do"
+                             :todo "NEXT"
+                             :order 2)
                             (:name "Due Today"
                              :deadline today
-                             :order 2)
+                             :order 3)
                             (:name "Important"
                              :tag "Important"
                              :priority "A"
-                             :order 3)
+                             :order 4)
                             (:name "Overdue"
                              :deadline past
-                             :order 4)
+                             :order 5)
                             (:name "Due Soon"
                              :deadline future
-                             :order 5)
+                             :order 6)
                             (:name "Less important"
                              :priority "B"
                              :order 7)
@@ -200,18 +203,18 @@
 
 ;; Open org files on startup
 
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (find-file "~/Dropbox/Org//someday.org")
-            (org-agenda nil "z")
-            (split-window-horizontally)
-            (find-file-other-window (concat org-directory "inbox.org"))
-            (split-window-vertically)
-            (find-file-other-window (concat org-directory "gtd.org"))))
+;; (add-hook 'emacs-startup-hook
+;;           (lambda ()
+;;             (org-agenda nil "z")
+;;             (split-window-horizontally)
+;;             (find-file-other-window (concat org-directory "inbox.org"))
+;;             (split-window-vertically)
+;;             (find-file-other-window (concat org-directory "gtd.org"))))
 
 ;; Org Roam configuration
 
-(setq org-roam-directory (concat org-directory "Roam"))
+
+(setq org-roam-directory (expand-file-name "~/Dropbox/Roam/"))
 
 ;; Python Environnements
 
@@ -229,3 +232,5 @@
   (setq pyvenv-post-deactivate-hooks
         (list (lambda ()
                 (setq python-shell-interpreter "python3")))))
+
+(setq org-html-head "<link rel=\"stylesheet\" href=\"https://rawgithub.com/edwardtufte/tufte-css/gh-pages/tufte.css\" type=\"text/css\" />")
