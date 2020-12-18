@@ -65,7 +65,7 @@ bindsym $super+v split v
 bindsym $super+f fullscreen toggle
 
 # Container layout
-bindsym $super+e layout toggle split
+bindsym $super+e layout split
 bindsym $super+s layout stacking
 bindsym $super+w layout tabbed
 
