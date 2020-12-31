@@ -234,3 +234,12 @@
                 (setq python-shell-interpreter "python3")))))
 
 (setq org-html-head "<link rel=\"stylesheet\" href=\"https://rawgithub.com/edwardtufte/tufte-css/gh-pages/tufte.css\" type=\"text/css\" />")
+
+;; C++ Config
+(setq lsp-clients-clangd-args '("-j=3"
+                                "--background-index"
+                                "--clang-tidy"
+                                "--completion-style=detailed"
+                                "--header-insertion=never"))
+(after! lsp-clangd (set-lsp-priority! 'clangd 2))
+(set-eglot-client! 'c++-mode '("clangd" "-j=3" "--clang-tidy"))
