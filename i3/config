@@ -88,8 +88,8 @@ bindsym $super+Shift+6 move container to workspace 6
 # Lock, Shutdown and Restart
 bindsym $super+Shift+s exec systemctl poweroff
 bindsym $super+Shift+r exec systemctl reboot
-bindsym $super+Shift+l exec i3lock-fancy -g -f Comic-Sans-MS -- scrot -z
-bindsym $super+Shift+h exec i3lock-fancy -g -f Comic-Sans-MS -- scrot -z & systemctl hibernate
+bindsym $super+Shift+l exec gnome-screensaver-command -l
+bindsym $super+Shift+h exec gnome-screensaver-command -l & systemctl hibernate
 
 # Change Keyboard Layout
 bindsym $super+Shift+space exec /home/sheepsody/.config/i3/i3-keyboard-layout cycle 
