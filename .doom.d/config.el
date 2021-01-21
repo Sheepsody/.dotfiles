@@ -242,4 +242,150 @@
                                 "--completion-style=detailed"
                                 "--header-insertion=never"))
 (after! lsp-clangd (set-lsp-priority! 'clangd 2))
-(set-eglot-client! 'c++-mode '("clangd" "-j=3" "--clang-tidy"))
+
+;; Org Roam Server
+
+(use-package org-roam-server
+  :ensure t
+  :config
+  (setq org-roam-server-host "127.0.0.1"
+        org-roam-server-port 8080
+        org-roam-server-authenticate nil
+        org-roam-server-export-inline-images t
+        org-roam-server-serve-files nil
+        org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
+        org-roam-server-network-poll t
+        org-roam-server-network-arrows nil
+        org-roam-server-network-label-truncate t
+        org-roam-server-network-label-truncate-length 60
+        org-roam-server-network-label-wrap-length 20))
+
+;; Org Roam
+;; From https://github.com/alexkehayias/emacs.d/
+
+(setq org-roam-publish-path "~/test")
+(setq org-roam-notes-path "~/Dropbox/Roam")
+
+(use-package org-roam
+  :ensure t
+  :init
+  ;; These functions need to be in :init otherwise they will not be
+  ;; callable in an emacs --batch context which for some reason
+  ;; can't be found in autoloads if it's under :config
+  (defun my/org-roam--extract-note-body (file)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (org-mode)
+      (first (org-element-map (org-element-parse-buffer) 'paragraph
+               (lambda (paragraph)
+                 (let ((begin (plist-get (first (cdr paragraph)) :begin))
+                       (end (plist-get (first (cdr paragraph)) :end)))
+                   (buffer-substring begin end)))))))
+
+  ;; Include backlinks in org exported notes not tagged as private or
+  ;; draft
+  (defun my/org-roam--backlinks-list (file)
+    (if (org-roam--org-roam-file-p file)
+        (--reduce-from
+         (concat acc (format "- [[file:%s][%s]]\n"
+                             (file-relative-name (car it) org-roam-directory)
+                             (org-roam--get-title-or-slug (car it))))
+         ""
+         (org-roam-db-query
+          [:select :distinct [links:source]
+           :from links
+           :left :outer :join tags :on (= links:source tags:file)
+           :where (and (= dest $s1)
+                       (or (is tags:tags nil)
+                           (and
+                            (not-like tags:tags '%private%)
+                            (not-like tags:tags '%draft%))))]
+          file))
+      ""))
+
+  (defun file-path-to-md-file-name (path)
+    (let ((file-name (first (last (split-string path "/")))))
+      (concat (first (split-string file-name "\\.")) ".md")))
+
+  (defun file-path-to-slug (path)
+    (let* ((file-name (car (last (split-string path "--"))))
+           (title (first (split-string file-name "\\."))))
+      (replace-regexp-in-string (regexp-quote "_") "-" title nil 'literal)))
+
+  ;; Fetches all org-roam files and exports to hugo markdown
+  ;; files. Adds in necessary hugo properties
+  ;; e.g. HUGO_BASE_DIR. Ignores notes tagged as private or draft
+  (defun org-roam-to-hugo-md ()
+    (interactive)
+    ;; Make sure the author is set
+    (setq user-full-name "Victor Vialard")
+
+    (let ((files (mapcan
+                  (lambda (x) x)
+                  (org-roam-db-query
+                   [:select [files:file]
+                    :from files
+                    :left :outer :join tags :on (= files:file tags:file)
+                    :where (or (is tags:tags nil)
+                               (and
+                                (not-like tags:tags '%private%)
+                                (not-like tags:tags '%draft%)))]))))
+      (mapc
+       (lambda (f)
+         ;; Use temporary buffer to prevent a buffer being opened for
+         ;; each note file.
+         (with-temp-buffer
+           (message "Working on: %s" f)
+           (insert-file-contents f)
+
+           (goto-char (point-min))
+           ;; Add in hugo tags for export. This lets you write the
+           ;; notes without littering HUGO_* tags everywhere
+           ;; HACK:
+           ;; org-export-output-file-name doesn't play nicely with
+           ;; temp buffers since it attempts to get the file name from
+           ;; the buffer. Instead we explicitely add the name of the
+           ;; exported .md file otherwise you would get prompted for
+           ;; the output file name on every note.
+           (insert
+            (format "#+HUGO_BASE_DIR: %s\n#+HUGO_SECTION: notes\n#+HUGO_SLUG: %s\n#+EXPORT_FILE_NAME: %s\n"
+                    org-roam-publish-path
+                    (file-path-to-slug f)
+                    (file-path-to-md-file-name f)))
+
+           ;; If this is a placeholder note (no content in the
+           ;; body) then add default text. This makes it look ok when
+           ;; showing note previews in the index and avoids a headline
+           ;; followed by a headline in the note detail page.
+           (if (eq (my/org-roam--extract-note-body f) nil)
+               (progn
+                 (goto-char (point-max))
+                 (insert "\n/This note does not have a description yet./\n")))
+
+           ;; Add in backlinks because
+           ;; org-export-before-processing-hook won't be useful the
+           ;; way we are using a temp buffer
+           (let ((links (my/org-roam--backlinks-list f)))
+             (unless (string= links "")
+               (goto-char (point-max))
+               (insert (concat "\n* Links to this note\n") links)))
+
+           (org-hugo-export-to-md)))
+       files)))
+
+  (map! :leader
+        :desc "New journal entry"
+        "n r h" #'org-roam-to-hugo-md)
+  :config
+  (setq org-roam-capture-templates
+        '(("d" "default" plain #'org-roam--capture-get-point "%?"
+           :file-name "${slug}"
+           :head "#+TITLE: ${title}\n#+hugo_lastmod: Time-stamp: <>\n#+ROAM_TAGS: private\n\n"
+           :unnarrowed t)
+          ("t" "temp" plain #'org-roam--capture-get-point "%?"
+           :file-name "%<%Y%m%d%H%M%S>-${slug}"
+           :head "#+TITLE: ${title}\n#+hugo_lastmod: Time-stamp: <>\n#+ROAM_TAGS: private\n\n"
+           :unnarrowed t))))
+
+;; Automatically change time stamp when saving a file
+(add-hook 'before-save-hook 'time-stamp)
