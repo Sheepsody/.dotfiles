@@ -374,12 +374,10 @@
   (setq org-roam-capture-templates
         '(("d" "default" plain #'org-roam--capture-get-point "%?"
            :file-name "${slug}"
-           :head "#+TITLE: ${title}\n#+hugo_lastmod: Time-stamp: <>\n#+ROAM_TAGS: private\n\n"
+           :head "#+TITLE: ${title}\n#+ROAM_TAGS: private\n\n"
            :unnarrowed t)
-          ("t" "temp" plain #'org-roam--capture-get-point "%?"
+          ("s" "stamped" plain #'org-roam--capture-get-point "%?"
            :file-name "%<%Y%m%d%H%M%S>-${slug}"
-           :head "#+TITLE: ${title}\n#+hugo_lastmod: Time-stamp: <>\n#+ROAM_TAGS: private\n\n"
+           :head "#+TITLE: ${title}\n#+ROAM_TAGS: private\n\n"
            :unnarrowed t))))
 
-;; Automatically change time stamp when saving a file
-(add-hook 'before-save-hook 'time-stamp)
