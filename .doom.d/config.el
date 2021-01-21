@@ -263,7 +263,7 @@
 ;; Org Roam
 ;; From https://github.com/alexkehayias/emacs.d/
 
-(setq org-roam-publish-path "~/test")
+(setq org-roam-publish-path "~/GitHub/sheepsody.github.io")
 (setq org-roam-notes-path "~/Dropbox/Roam")
 
 (use-package org-roam
@@ -307,11 +307,6 @@
     (let ((file-name (first (last (split-string path "/")))))
       (concat (first (split-string file-name "\\.")) ".md")))
 
-  (defun file-path-to-slug (path)
-    (let* ((file-name (car (last (split-string path "--"))))
-           (title (first (split-string file-name "\\."))))
-      (replace-regexp-in-string (regexp-quote "_") "-" title nil 'literal)))
-
   ;; Fetches all org-roam files and exports to hugo markdown
   ;; files. Adds in necessary hugo properties
   ;; e.g. HUGO_BASE_DIR. Ignores notes tagged as private or draft
@@ -348,9 +343,8 @@
            ;; exported .md file otherwise you would get prompted for
            ;; the output file name on every note.
            (insert
-            (format "#+HUGO_BASE_DIR: %s\n#+HUGO_SECTION: notes\n#+HUGO_SLUG: %s\n#+EXPORT_FILE_NAME: %s\n"
+            (format "#+HUGO_BASE_DIR: %s\n#+HUGO_SECTION: notes\n#+EXPORT_FILE_NAME: %s\n"
                     org-roam-publish-path
-                    (file-path-to-slug f)
                     (file-path-to-md-file-name f)))
 
            ;; If this is a placeholder note (no content in the
