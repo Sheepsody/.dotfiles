@@ -11,3 +11,5 @@
 ;; Org Mode extensions
 
 (package! org-super-agenda)
+(package! org-roam-server)
+(package! ox-hugo)
