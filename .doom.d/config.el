@@ -50,7 +50,7 @@
 
 ;; Language config
 
-(setq ispell-dictionary "francais")
+(setq ispell-dictionary "en_GB")
 
 ;; Relative numbers by default
 
