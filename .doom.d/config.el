@@ -90,7 +90,6 @@
 ;; Js/Ts/CSS config
 
 (use-package prettier-js
-  :ensure t
   :config
   (setq prettier-js-args '(
                            "--trailing-comma" "es5"
@@ -102,11 +101,9 @@
                            "--stylelint-integration" "true"
                            )))
 
-(use-package js2-mode
-  :ensure t)
+(use-package js2-mode)
 
 (use-package rjsx-mode
-  :ensure t
   :mode(("\\.js\\'" . rjsx-mode)
         ("\\.jsx\\'" . rjsx-mode))
   :init
@@ -114,7 +111,6 @@
   (add-hook 'rjsx-mode-hook 'tide-mode))
 
 (use-package tide
-  :ensure t
   :mode(("\\.ts\\'" . typescript-mode))
   :init
   (add-hook 'typescript-mode-hook 'tide-mode)
@@ -219,7 +215,6 @@
 ;; Python Environnements
 
 (use-package pyvenv
-  :ensure t
   :config
   (pyvenv-mode t)
   (setenv "WORKON_HOME" "~/.pyenv/versions")
@@ -246,7 +241,6 @@
 ;; Org Roam Server
 
 (use-package org-roam-server
-  :ensure t
   :config
   (setq org-roam-server-host "127.0.0.1"
         org-roam-server-port 8080
@@ -263,11 +257,15 @@
 ;; Org Roam
 ;; From https://github.com/alexkehayias/emacs.d/
 
-(setq org-roam-publish-path "~/GitHub/sheepsody.github.io")
+(setq org-roam-publish-path "~/GitHub/MySecondBrainWebsite")
 (setq org-roam-notes-path "~/Dropbox/Roam")
 
 (use-package org-roam
-  :ensure t
+  :config
+  (setq org-roam-graph-executable
+        (executable-find "neato"))
+  (setq org-roam-graphviz-extra-options
+        '(("overlap" . "false")))
   :init
   ;; These functions need to be in :init otherwise they will not be
   ;; callable in an emacs --batch context which for some reason
@@ -343,7 +341,7 @@
            ;; exported .md file otherwise you would get prompted for
            ;; the output file name on every note.
            (insert
-            (format "#+HUGO_BASE_DIR: %s\n#+HUGO_SECTION: notes\n#+EXPORT_FILE_NAME: %s\n"
+            (format "#+HUGO_BASE_DIR: %s\n#+HUGO_SECTION: posts\n#+EXPORT_FILE_NAME: %s\n"
                     org-roam-publish-path
                     (file-path-to-md-file-name f)))
 
@@ -372,12 +370,19 @@
         "n r h" #'org-roam-to-hugo-md)
   :config
   (setq org-roam-capture-templates
-        '(("d" "default" plain #'org-roam--capture-get-point "%?"
-           :file-name "${slug}"
-           :head "#+TITLE: ${title}\n#+ROAM_TAGS: private\n\n"
+        '(("p" "private" plain #'org-roam--capture-get-point "%?"
+           :file-name "%<%Y%m%d%H%M%S>-${slug}"
+           :head "#+TITLE: ${title}\n#+ROAM_TAGS: draft\n\n"
            :unnarrowed t)
-          ("s" "stamped" plain #'org-roam--capture-get-point "%?"
+          ("d" "draft" plain #'org-roam--capture-get-point "%?"
            :file-name "%<%Y%m%d%H%M%S>-${slug}"
            :head "#+TITLE: ${title}\n#+ROAM_TAGS: private\n\n"
            :unnarrowed t))))
 
+;; Deft Configuration
+
+(use-package deft
+  :config
+  (setq deft-extensions '("txt" "tex" "org"))
+  (setq deft-directory "~/Dropbox/Roam")
+  (setq deft-recursive t))
