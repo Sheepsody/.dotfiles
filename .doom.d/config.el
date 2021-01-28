@@ -83,6 +83,14 @@
           ("DONE" :foreground "#c3e88d" :weight normal :underline t)
           ("CANCELLED" :foreground "#ff5370" :weight normal :underline t))))
 
+(add-hook 'org-mode-hook (lambda ()
+                             (setq-local time-stamp-active t
+                                         time-stamp-line-limit 18
+                                         time-stamp-start "^#\\+hugo_lastmod: [ \t]*"
+                                         time-stamp-end "$"
+                                         time-stamp-format "\[%Y-%m-%d %a %H:%M:%S\]")
+                             (add-hook 'before-save-hook 'time-stamp nil 'local)))
+
 ;; Rust configutation
 
 (setq lsp-rust-server 'rust-analyzer)
@@ -209,8 +217,7 @@
 
 ;; Org Roam configuration
 
-
-(setq org-roam-directory (expand-file-name "~/Dropbox/Roam/"))
+(setq org-roam-directory "~/Dropbox/Roam/")
 
 ;; Python Environnements
 
@@ -262,9 +269,8 @@
 
 (use-package org-roam
   :config
-  (setq org-roam-graph-executable
-        (executable-find "neato"))
-  (setq org-roam-graphviz-extra-options
+  (setq org-roam-graph-executable "neato")
+  (setq org-roam-graph-extra-config
         '(("overlap" . "false")))
   :init
   ;; These functions need to be in :init otherwise they will not be
@@ -287,7 +293,7 @@
         (--reduce-from
          (concat acc (format "- [[file:%s][%s]]\n"
                              (file-relative-name (car it) org-roam-directory)
-                             (org-roam--get-title-or-slug (car it))))
+                             (org-roam-db--get-title (car it))))
          ""
          (org-roam-db-query
           [:select :distinct [links:source]
@@ -372,12 +378,16 @@
   (setq org-roam-capture-templates
         '(("p" "private" plain #'org-roam--capture-get-point "%?"
            :file-name "%<%Y%m%d%H%M%S>-${slug}"
-           :head "#+TITLE: ${title}\n#+ROAM_TAGS: draft\n\n"
+           :head "#+TITLE: ${title}\n#+date: %t\n#+lastmod: %t\n#+ROAM_TAGS: private\n\n"
            :unnarrowed t)
           ("d" "draft" plain #'org-roam--capture-get-point "%?"
            :file-name "%<%Y%m%d%H%M%S>-${slug}"
-           :head "#+TITLE: ${title}\n#+ROAM_TAGS: private\n\n"
+           :head "#+TITLE: ${title}\n#+date: %t\n#+lastmod: %t\n#+ROAM_TAGS: draft\n\n"
            :unnarrowed t))))
+
+(use-package ox-hugo
+  :config
+  (setq org-hugo-date-format "%Y-%m-%d"))
 
 ;; Deft Configuration
 
