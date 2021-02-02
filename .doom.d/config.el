@@ -84,12 +84,12 @@
           ("CANCELLED" :foreground "#ff5370" :weight normal :underline t))))
 
 (add-hook 'org-mode-hook (lambda ()
-                             (setq-local time-stamp-active t
-                                         time-stamp-line-limit 18
-                                         time-stamp-start "^#\\+hugo_lastmod: [ \t]*"
-                                         time-stamp-end "$"
-                                         time-stamp-format "\[%Y-%m-%d %a %H:%M:%S\]")
-                             (add-hook 'before-save-hook 'time-stamp nil 'local)))
+                           (setq-local time-stamp-active t
+                                       time-stamp-line-limit 18
+                                       time-stamp-start "^#\\+hugo_lastmod: [ \t]*"
+                                       time-stamp-end "$"
+                                       time-stamp-format "\[%Y-%m-%d %a %H:%M:%S\]")
+                           (add-hook 'before-save-hook 'time-stamp nil 'local)))
 
 ;; Rust configutation
 
@@ -378,11 +378,11 @@
   (setq org-roam-capture-templates
         '(("p" "private" plain #'org-roam--capture-get-point "%?"
            :file-name "%<%Y%m%d%H%M%S>-${slug}"
-           :head "#+TITLE: ${title}\n#+date: %t\n#+lastmod: %t\n#+ROAM_TAGS: private\n\n"
+           :head "#+TITLE: ${title}\n#+date: %t\n#+hugo_lastmod: %t\n#+ROAM_TAGS: private\n\n"
            :unnarrowed t)
           ("d" "draft" plain #'org-roam--capture-get-point "%?"
            :file-name "%<%Y%m%d%H%M%S>-${slug}"
-           :head "#+TITLE: ${title}\n#+date: %t\n#+lastmod: %t\n#+ROAM_TAGS: draft\n\n"
+           :head "#+TITLE: ${title}\n#+date: %t\n#+hugo_lastmod: %t\n#+ROAM_TAGS: draft\n\n"
            :unnarrowed t))))
 
 (use-package ox-hugo
