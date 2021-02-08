@@ -40,6 +40,9 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
+;; Start a good morning...
+(setq fancy-splash-image "~/.doom.d/totoro.png")
+
 ;; Auto-completion configuration
 
 (after! company
