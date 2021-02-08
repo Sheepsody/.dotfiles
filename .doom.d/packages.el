@@ -13,3 +13,5 @@
 (package! org-super-agenda)
 (package! org-roam-server)
 (package! ox-hugo)
+(package! org-ref)
+(package! citeproc-org)
