@@ -392,6 +392,12 @@
   :config
   (setq org-hugo-date-format "%Y-%m-%d"))
 
+(use-package citeproc-org
+  :ensure t
+  :after ox-hugo
+  :config
+  (citeproc-org-setup))
+
 ;; Deft Configuration
 
 (use-package deft
@@ -399,3 +405,30 @@
   (setq deft-extensions '("txt" "tex" "org"))
   (setq deft-directory "~/Dropbox/Roam")
   (setq deft-recursive t))
+
+;; Org Roam Bibtex
+
+(use-package org-ref
+  :after org
+  :config
+  (setq org-ref-bibliography-notes "~/Dropbox/Roam/notes/"
+        org-ref-default-bibliography '("~/Dropbox/Roam/references.bib")
+        org-ref-pdf-directory "~/Dropbox/Roam/pdf/"))
+
+(after! org-ref
+  (setq bibtex-completion-pdf-symbol "⌘")
+  (setq bibtex-completion-notes-symbol "✎")
+  (setq bibtex-completion-bibliography "~/Dropbox/Roam/references.bib")
+  (setq bibtex-completion-library-path "~/Dropbox/Roam/pdf/")
+  (setq bibtex-completion-notes-path "~/Dropbox/Roam/notes/"))
+
+;; Journal
+
+(use-package! org-journal
+  :ensure t
+  :defer t
+  :config
+  (setq org-journal-dir "~/Dropbox/Journal/"
+        org-journal-date-prefix "* "
+        org-journal-file-format "%Y-%m-%d.org"
+        org-journal-date-format "%A, %d-%B-%Y"))
