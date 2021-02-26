@@ -14,6 +14,7 @@ exec --no-startup-id xsettingsd &
 exec --no-startup-id compton -b
 exec --no-startup-id ibus-daemon --xim -d -r
 exec --no-startup-id dropbox start &
+exec --no-startup-id emacs
 
 # start dmenu (a program launcher)
 bindsym $super+Shift+d exec i3-dmenu-desktop --dmenu="dmenu -i -fn 'Noto Sans:size=8'"
@@ -65,9 +66,7 @@ bindsym $super+v split v
 bindsym $super+f fullscreen toggle
 
 # Container layout
-bindsym $super+e layout split
-bindsym $super+s layout stacking
-bindsym $super+w layout tabbed
+bindsym $super+w layout toggle
 
 # switch to workspace
 bindsym $super+1 workspace 1
