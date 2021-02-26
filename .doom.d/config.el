@@ -409,7 +409,20 @@
         org-journal-date-prefix "* "
         org-journal-file-format "%Y-%m-%d.org"
         org-journal-date-format "%A, %B %d %Y"
-        org-journal-file-header "#+TITLE: Weekly Journal - Week %U, %B %Y\n#+STARTUP: folded\n"))
+        org-journal-file-header "#+TITLE: Weekly Journal\n#+SUBTITLE: Week %U, %B %Y\n#+STARTUP: folded\n\n")
+  (defun org-journal-find-location ()
+    (org-journal-new-entry t)
+    (unless (eq org-journal-file-type 'daily)
+      (org-narrow-to-subtree))
+    (goto-char (point-max)))
+  (add-to-list 'org-capture-templates
+               `("j" "Journal entry" entry (function org-journal-find-location)
+                 "** %(format-time-string org-journal-time-format)%^{Title}\n%i%?"
+                 :jump-to-captured t :immediate-finish t))
+  (add-to-list 'org-capture-templates
+               `("w" "Weekly review" entry (function org-journal-find-location)
+                 (file ,(expand-file-name "~/Dropbox/Org/weekly.org"))
+                 :jump-to-captured t :immediate-finish t)))
 
 ;; ElFeed RSS reader
 
