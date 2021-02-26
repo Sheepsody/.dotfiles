@@ -432,3 +432,13 @@
         org-journal-date-prefix "* "
         org-journal-file-format "%Y-%m-%d.org"
         org-journal-date-format "%A, %d-%B-%Y"))
+;; ElFeed RSS reader
+
+(use-package! elfeed-org
+  :ensure t
+  :config
+  (elfeed-org)
+  (setq rmh-elfeed-org-files (list "~/Dropbox/Org/elfeed.org")))
+(map! :leader
+      (:prefix-map ("e" . "elfeed")
+       :desc "ElFeed" "e" #'elfeed))
