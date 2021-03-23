@@ -53,3 +53,6 @@ eval "$(pyenv virtualenv-init -)"
 
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
+
+eval $(opam env)
+[ -f "/home/sheepsody/.ghcup/env" ] && source "/home/sheepsody/.ghcup/env" # ghcup-env

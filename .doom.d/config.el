@@ -224,22 +224,6 @@
                                 "--header-insertion=never"))
 (after! lsp-clangd (set-lsp-priority! 'clangd 2))
 
-;; Org Roam Server
-
-(use-package org-roam-server
-  :config
-  (setq org-roam-server-host "127.0.0.1"
-        org-roam-server-port 8080
-        org-roam-server-authenticate nil
-        org-roam-server-export-inline-images t
-        org-roam-server-serve-files nil
-        org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
-        org-roam-server-network-poll t
-        org-roam-server-network-arrows nil
-        org-roam-server-network-label-truncate t
-        org-roam-server-network-label-truncate-length 60
-        org-roam-server-network-label-wrap-length 20))
-
 ;; Org Roam
 ;; From https://github.com/alexkehayias/emacs.d/
 
@@ -356,11 +340,11 @@
   :config
   (setq org-roam-capture-templates
         '(("p" "private" plain #'org-roam--capture-get-point "%?"
-           :file-name "%<%Y%m%d%H%M%S>-${slug}"
+           :file-name "%<%Y%m%d>-${slug}"
            :head "#+TITLE: ${title}\n#+date: %t\n#+hugo_lastmod: %t\n#+ROAM_TAGS: private\n\n"
            :unnarrowed t)
           ("d" "draft" plain #'org-roam--capture-get-point "%?"
-           :file-name "%<%Y%m%d%H%M%S>-${slug}"
+           :file-name "%<%Y%m%d>-${slug}"
            :head "#+TITLE: ${title}\n#+date: %t\n#+hugo_lastmod: %t\n#+ROAM_TAGS: draft\n\n"
            :unnarrowed t))))
 
@@ -384,19 +368,44 @@
 
 ;; Org Roam Bibtex
 
-(use-package org-ref
+(use-package! org-ref
   :after org
   :config
-  (setq org-ref-bibliography-notes "~/Dropbox/Roam/notes/"
+  (setq org-ref-bibliography-notes "~/Dropbox/Roam/refs/"
         org-ref-default-bibliography '("~/Dropbox/Roam/references.bib")
         org-ref-pdf-directory "~/Dropbox/Roam/pdf/"))
 
-(after! org-ref
-  (setq bibtex-completion-pdf-symbol "⌘")
-  (setq bibtex-completion-notes-symbol "✎")
-  (setq bibtex-completion-bibliography "~/Dropbox/Roam/references.bib")
-  (setq bibtex-completion-library-path "~/Dropbox/Roam/pdf/")
-  (setq bibtex-completion-notes-path "~/Dropbox/Roam/notes/"))
+(use-package! bibtex-completion
+  :config
+  (setq bibtex-completion-pdf-symbol "⌘"
+        bibtex-completion-pdf-field "file"
+        bibtex-completion-notes-symbol "✎"
+        bibtex-completion-bibliography "~/Dropbox/Roam/references.bib"
+        bibtex-completion-library-path "~/Dropbox/Roam/pdf/"
+        bibtex-completion-notes-path "~/Dropbox/Roam/refs/"
+        bibtex-completion-notes-template-multiple-files
+        (concat
+         "${title}\n"
+         "#+hugo_lastmod: %t\n"
+         "#+roam_key: cite:${=key=} private\n"
+         ":PROPERTIES:\n"
+         ":CUSTOM_ID: ${=key=}\n"
+         ":NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n"
+         ":AUTHOR: ${author-abbrev}\n"
+         ":JOURNAL: ${journaltitle}\n"
+         ":DATE: ${date}\n"
+         ":YEAR: ${year}\n"
+         ":DOI: ${doi}\n"
+         ":URL: ${url}\n"
+         ":END:\n\n"
+         )))
+
+;; Tell org-ref to let helm-bibtex find notes for it
+(setq org-ref-notes-function
+      (lambda (thekey)
+        (let ((bibtex-completion-bibliography (org-ref-find-bibliography)))
+          (bibtex-completion-edit-notes
+           (list (car (org-ref-get-bibtex-key-and-file thekey)))))))
 
 ;; Journal
 
@@ -434,3 +443,12 @@
 (map! :leader
       (:prefix-map ("e" . "elfeed")
        :desc "ElFeed" "e" #'elfeed))
+
+;; Speeding-up editing
+
+(defun my/insert-quote ()
+  (interactive)
+  (insert "#+begin_quote\n«  »\n#+end_quote"))
+(map! :leader
+      :desc "Insert quote"
+      "i q" #'my/insert-quote)

@@ -22,8 +22,6 @@ bindsym $super+d exec rofi -lines 12 -padding 18 -width 60 -location 0 -show dru
 
 # common apps keybinds
 bindsym Print exec scrot 'Cheese_%a-%d%b%y_%H.%M.png' -e 'viewnior ~/$f'
-bindsym $super+Shift+b exec firefox
-bindsym $super+Shift+f exec nautilus 
 bindsym $super+Shift+c exec emacs
 
 # Change volume
@@ -66,6 +64,7 @@ bindsym $super+v split v
 bindsym $super+f fullscreen toggle
 
 # Container layout
+bindsym $super+Shift+f floating toggle
 bindsym $super+w layout toggle
 
 # switch to workspace
