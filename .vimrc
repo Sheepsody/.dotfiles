@@ -16,15 +16,9 @@ Plug 'sjl/gundo.vim'
 
 " Markdown syntax, matching and mapping
 Plug 'godlygeek/tabular'
-Plug 'plasticboy/vim-markdown'
-
-" Conquer of Completion
-" Used for Autocompletion
-Plug 'neoclide/coc.nvim', { 'branch': 'master', 'do': 'yarn install --frozen-lockfile' }
 
 " Colorscheme & syntax
-Plug 'tomasr/molokai'
-Plug 'sheerun/vim-polyglot'
+Plug 'joshdick/onedark.vim'
 
 " Snippets are separated from the engine. Add this if you want them:
 Plug 'honza/vim-snippets'
@@ -39,10 +33,10 @@ Plug 'rust-lang/rust.vim'
 
 call plug#end()            " required
 
-colorscheme molokai 
-
 filetype plugin indent on    " required
 syntax on
+
+colorscheme onedark
 
 " Leader
 let mapleader=" "
@@ -96,6 +90,7 @@ endif
 set clipboard=unnamed
 
 let g:airline_powerline_fonts = 1
+let g:airline_theme='onedark'
 
 "" Bindings to switch between tabs
 map <C-j> :tabprevious<CR>
@@ -134,45 +129,6 @@ nnoremap gdl :diffget //3<CR>
 " Give more space for displaying messages.
 set cmdheight=2
 
-" Use `[g` and `]g` to navigate diagnostics
-nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
-
-" GoTo code navigation.
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-
-" Use K to show documentation in preview window.
-nnoremap <silent> K :call <SID>show_documentation()<CR>
-
-function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  else
-    call CocAction('doHover')
-  endif
-endfunction
-
-let g:coc_global_extensions = [
-			\ 'coc-dictionary',
-			\ 'coc-tsserver',
-			\ 'coc-eslint',
-			\ 'coc-python',
-			\ 'coc-clangd',
-			\ 'coc-rls',
-			\ 'coc-texlab',
-			\ ]
-
-" Symbol renaming.
-nmap <leader>rn <Plug>(coc-rename)
-
-" Add `:Fold` command to fold current buffer.
-command! -nargs=? Fold :call     CocAction('fold', <f-args>)
-
-" Add `:OR` command for organize imports of the current buffer.
-command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
 
 set conceallevel=2
 let g:vim_markdown_math = 1
@@ -182,55 +138,3 @@ let g:vim_markdown_json_frontmatter = 1
 let g:vim_markdown_strikethrough = 1
 let g:vim_markdown_new_list_item_indent = 2
 
-let g:ale_linters = { 
-			\ 'rust' : ['rustc', 'rls'],
-			\ 'python': ['pylint'],
-\}
-
-let g:ale_fixers = {
-\  'javascript': ['eslint'],
-\  'python': ['autopep8'],
-\  'rust': ['rustfmt']
-\}
-
-let g:ale_fix_on_save = 1
-let g:ale_python_pylint_executable = 'python3'
-let g:ale_python_pylint_use_global = 1
-let g:ale_completion_enabled = 0
-" ## added by OPAM user-setup for vim / base ## 93ee63e278bdfc07d1139a748ed3fff2 ## you can edit, but keep this line
-let s:opam_share_dir = system("opam config var share")
-let s:opam_share_dir = substitute(s:opam_share_dir, '[\r\n]*$', '', '')
-
-let s:opam_configuration = {}
-
-function! OpamConfOcpIndent()
-  execute "set rtp^=" . s:opam_share_dir . "/ocp-indent/vim"
-endfunction
-let s:opam_configuration['ocp-indent'] = function('OpamConfOcpIndent')
-
-function! OpamConfOcpIndex()
-  execute "set rtp+=" . s:opam_share_dir . "/ocp-index/vim"
-endfunction
-let s:opam_configuration['ocp-index'] = function('OpamConfOcpIndex')
-
-function! OpamConfMerlin()
-  let l:dir = s:opam_share_dir . "/merlin/vim"
-  execute "set rtp+=" . l:dir
-endfunction
-let s:opam_configuration['merlin'] = function('OpamConfMerlin')
-
-let s:opam_packages = ["ocp-indent", "ocp-index", "merlin"]
-let s:opam_check_cmdline = ["opam list --installed --short --safe --color=never"] + s:opam_packages
-let s:opam_available_tools = split(system(join(s:opam_check_cmdline)))
-for tool in s:opam_packages
-  " Respect package order (merlin should be after ocp-index)
-  if count(s:opam_available_tools, tool) > 0
-    call s:opam_configuration[tool]()
-  endif
-endfor
-" ## end of OPAM user-setup addition for vim / base ## keep this line
-" ## added by OPAM user-setup for vim / ocp-indent ## 02f3142f370f025d9901a45e648c9d5f ## you can edit, but keep this line
-if count(s:opam_available_tools,"ocp-indent") == 0
-  source "/home/sheepsody/.opam/default/share/ocp-indent/vim/indent/ocaml.vim"
-endif
-" ## end of OPAM user-setup addition for vim / ocp-indent ## keep this line
