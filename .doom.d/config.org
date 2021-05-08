@@ -1,21 +1,45 @@
+#+TITLE: Dot-Emacs Configuration
+#+AUTHOR: Victor Vialard
+#+STARTUP: fold
+
+* General
+** Personal Informations
+
+#+begin_src elisp
 (setq user-full-name "Victor Vialard"
       user-mail-address "vvialard@hotmail.fr")
+#+end_src
 
+** Theme
+
+#+begin_src elisp
 ;; Doom's theme
 (setq doom-theme 'doom-one)
 (setq display-line-numbers-type 'relative)
 
 ;; Start a good morning...
 (setq fancy-splash-image "~/.doom.d/totoro.png")
+#+end_src
 
+** Autocompletion
+
+#+begin_src elisp
 (after! company
   (setq company-idle-delay 0.2
         company-minimum-prefix-length 1)
   (setq company-show-numbers t)
   (add-hook 'evil-normal-state-entry-hook #'company-abort )) ;; make aborting less annoying.
+#+end_src
 
+** Language
+
+#+begin_src elisp
 (setq ispell-dictionary "en_GB")
+#+end_src
 
+** Bindings
+
+#+begin_src elisp
 ;; Insert quotes for citations
 (defun my/insert-quote ()
   (interactive)
@@ -23,7 +47,12 @@
 (map! :leader
       :desc "Insert quote"
       "i q" #'my/insert-quote)
+#+end_src
 
+* Org-Mode
+** Org
+
+#+begin_src elisp
 ;; Org Directory
 (setq org-directory (expand-file-name "~/Dropbox/Org/"))
 (setq org-image-actual-width '(600))
@@ -57,13 +86,21 @@
           ("DONE"      :foreground "#98be65") ;; brightgreen
           ("CANCELLED" :foreground "#73797e") ;; gray
           )))
+#+end_src
 
+** Org-Clock
+
+#+begin_src elisp
 ;; Display time & Org Clock config
 (display-time-mode 1)
 (setq org-global-properties
       '(("Effort_ALL" .
          "0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00 0:00")))
+#+end_src
 
+** Org-Agenda
+
+#+begin_src elisp
 ;; Org Super Agenda & Custom views
 (use-package! org-super-agenda
   :commands (org-super-agenda-mode))
@@ -148,7 +185,11 @@
                             ))))))))
   :config
   (org-super-agenda-mode))
+#+end_src
 
+** Org-Journal
+
+#+begin_src elisp
 (use-package! org-journal
   :ensure t
   :defer t
@@ -172,7 +213,11 @@
                `("w" "Weekly review" entry (function org-journal-find-location)
                  (file ,(expand-file-name "~/Dropbox/Org/weekly.org"))
                  :jump-to-captured t :immediate-finish t)))
+#+end_src
 
+** Ox-Hugo
+
+#+begin_src elisp
 ;; Org Roam
 ;; Inspired from https://github.com/alexkehayias/emacs.d/
 
@@ -297,7 +342,11 @@
            :file-name "%<%Y%m%d>-${slug}"
            :head "#+TITLE: ${title}\n#+date: %t\n#+hugo_lastmod: %t\n#+ROAM_TAGS: draft\n\n"
            :unnarrowed t))))
+#+end_src
 
+** Deft
+
+#+begin_src elisp
 ;; Deft Configuration
 ;; Used for quick browsing of plain text notes
 
@@ -306,7 +355,11 @@
   (setq deft-extensions '("txt" "tex" "org"))
   (setq deft-directory "~/Dropbox/Roam")
   (setq deft-recursive t))
+#+end_src
 
+** Ox-hugo
+
+#+begin_src elisp
 (use-package ox-hugo
   :config
   (setq org-hugo-date-format "%Y-%m-%d"))
@@ -319,7 +372,11 @@
                                        time-stamp-end "$"
                                        time-stamp-format "\[%Y-%m-%d %a %H:%M:%S\]")
                            (add-hook 'before-save-hook 'time-stamp nil 'local)))
+#+end_src
 
+** Citations
+
+#+begin_src elisp
 (use-package citeproc-org
   :ensure t
   :after ox-hugo
@@ -366,11 +423,20 @@
         (let ((bibtex-completion-bibliography (org-ref-find-bibliography)))
           (bibtex-completion-edit-notes
            (list (car (org-ref-get-bibtex-key-and-file thekey)))))))
+#+end_src
 
+* Languages
+** Rust
+
+#+begin_src elisp
 ;; Rust configutation
 
 (setq lsp-rust-server 'rust-analyzer)
+#+end_src
 
+** TypeScript, JavaScript & CSS
+
+#+begin_src elisp
 ;; Js/Ts/CSS config
 
 (use-package prettier-js
@@ -406,7 +472,11 @@
   (eldoc-mode +1)
   (tide-hl-identifier-mode +1)
   (company-mode +1))
+#+end_src
 
+** Python
+
+#+begin_src elisp
 ;; Python Environnements
 
 (use-package pyvenv
@@ -432,7 +502,12 @@
                                 "--completion-style=detailed"
                                 "--header-insertion=never"))
 (after! lsp-clangd (set-lsp-priority! 'clangd 2))
+#+end_src
 
+* Other
+** Elfeed
+
+#+begin_src elisp
 ;; ElFeed RSS reader
 
 (use-package! elfeed-org
@@ -443,3 +518,5 @@
 (map! :leader
       (:prefix-map ("e" . "elfeed")
        :desc "ElFeed" "e" #'elfeed))
+#+end_src
+
