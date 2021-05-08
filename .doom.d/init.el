@@ -159,7 +159,7 @@
         +journal
         +pretty)
        ;;php               ; perl's insecure younger brother
-       ;;plantuml          ; diagrams for confusing people more
+       plantuml          ; diagrams for confusing people more
        ;;purescript        ; javascript, but functional
        (python
         +pyenv
@@ -194,7 +194,7 @@
        ;;twitter           ; twitter client https://twitter.com/vnought
 
        :config
-       ;;literate
+       literate
        (default
          +smartparens
          +bindings))
