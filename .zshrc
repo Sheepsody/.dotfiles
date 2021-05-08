@@ -30,6 +30,7 @@ plugins=(
         kubectl
         cargo
         docker
+        zsh-pyenv
 )
 
 alias vim="nvim"
