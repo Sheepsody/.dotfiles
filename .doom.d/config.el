@@ -24,6 +24,10 @@
       :desc "Insert quote"
       "i q" #'my/insert-quote)
 
+(map! :leader
+      :desc "Structure Template"
+      "i s" #'org-insert-structure-template)
+
 ;; Org Directory
 (setq org-directory (expand-file-name "~/Dropbox/Org/"))
 (setq org-image-actual-width '(600))

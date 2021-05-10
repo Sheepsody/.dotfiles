@@ -47,6 +47,10 @@
 (map! :leader
       :desc "Insert quote"
       "i q" #'my/insert-quote)
+
+(map! :leader
+      :desc "Structure Template"
+      "i s" #'org-insert-structure-template)
 #+end_src
 
 * Org-Mode
@@ -86,6 +90,7 @@
           ("DONE"      :foreground "#98be65") ;; brightgreen
           ("CANCELLED" :foreground "#73797e") ;; gray
           )))
+
 #+end_src
 
 ** Org-Clock
