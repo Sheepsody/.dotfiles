@@ -397,6 +397,7 @@
         org-ref-pdf-directory "~/Dropbox/Roam/pdf/"))
 
 (use-package! bibtex-completion
+  :after org-ref
   :config
   (setq bibtex-completion-pdf-symbol "⌘"
         bibtex-completion-pdf-field "file"
