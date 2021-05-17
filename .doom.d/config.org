@@ -51,6 +51,10 @@
 (map! :leader
       :desc "Structure Template"
       "i s" #'org-insert-structure-template)
+
+(map! :leader
+      :desc "Insert Reference"
+      "i c" #'org-ref-helm-insert-cite-link)
 #+end_src
 
 * Org-Mode
@@ -66,7 +70,7 @@
   (setq org-archive-location (concat org-directory "archived.org::"))
 
   (setq org-agenda-files '("~/Dropbox/Org/inbox.org"
-                           "~/Dropbox/Org/tickler.org"
+                           "~/Dropbox/Org/calendar.org"
                            "~/Dropbox/Org/gtd.org"))
 
   ;; Capture templates
@@ -74,8 +78,8 @@
         '(("t" "Todo [inbox]" entry
            (file+headline "~/Dropbox/Org/inbox.org" "Tasks")
            "* TODO %i%?")
-          ("T" "Tickler" entry
-           (file+headline "~/Dropbox/Org/tickler.org" "Tickler")
+          ("T" "Calendar" entry
+           (file+headline "~/Dropbox/Org/calendar.org" "Calendar")
            "* %i%? \n %U")))
 
   ;; Keywords
@@ -90,7 +94,6 @@
           ("DONE"      :foreground "#98be65") ;; brightgreen
           ("CANCELLED" :foreground "#73797e") ;; gray
           )))
-
 #+end_src
 
 ** Org-Clock
@@ -511,6 +514,13 @@
 #+end_src
 
 * Other
+** Private Settings
+
+#+begin_src elisp
+(after! org
+  (load! "private-config.el"))
+#+end_src
+
 ** Elfeed
 
 #+begin_src elisp
