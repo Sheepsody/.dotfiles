@@ -55,6 +55,10 @@
 (map! :leader
       :desc "Insert Reference"
       "i c" #'org-ref-helm-insert-cite-link)
+
+(map! :leader
+      :desc "Insert Reference"
+      "o C" #'=calendar)
 #+end_src
 
 * Org-Mode
@@ -76,11 +80,11 @@
   ;; Capture templates
   (setq org-capture-templates
         '(("t" "Todo [inbox]" entry
-           (file+headline "~/Dropbox/Org/inbox.org" "Tasks")
+           (file "~/Dropbox/Org/inbox.org")
            "* TODO %i%?")
-          ("T" "Calendar" entry
-           (file+headline "~/Dropbox/Org/calendar.org" "Calendar")
-           "* %i%? \n %U")))
+          ("e" "Event" entry
+           (file "~/Dropbox/Org/calendar.org")
+           "* %^{Event status?||TODO |NEXT }%^{Title}\nSCHEDULED: %^t\n%?")))
 
   ;; Keywords
   (setq org-todo-keywords
