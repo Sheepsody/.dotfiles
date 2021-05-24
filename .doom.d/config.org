@@ -567,7 +567,7 @@
     (goto-char (point-min))
     (while (re-search-forward "xmlUrl" nil t)
       (replace-match "type=\"rss\" xmlUrl"))
-    (write-file "elfeed.opml")))
+    (write-file (concat org-directory "elfeed.opml"))))
 #+end_src
 
 #+begin_src elisp
@@ -576,6 +576,3 @@
        :desc "ElFeed" "e" #'elfeed
        :desc "Export OPML" "o" #'my/export-opml))
 #+end_src
-
-#+RESULTS:
-: my/export-opml
