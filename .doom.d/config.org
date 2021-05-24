@@ -44,6 +44,7 @@
 (defun my/insert-quote ()
   (interactive)
   (insert "#+begin_quote\n«  »\n#+end_quote"))
+
 (map! :leader
       :desc "Insert quote"
       "i q" #'my/insert-quote)
@@ -529,14 +530,52 @@
 
 #+begin_src elisp
 ;; ElFeed RSS reader
-
 (use-package! elfeed-org
   :ensure t
   :config
   (elfeed-org)
   (setq rmh-elfeed-org-files (list "~/Dropbox/Org/elfeed.org")))
-(map! :leader
-      (:prefix-map ("e" . "elfeed")
-       :desc "ElFeed" "e" #'elfeed))
 #+end_src
 
+#+begin_src elisp
+(defun my/export-opml ()
+  "Exports Org-Elfeed config so it can be directly loaded into Android's RSS Reader"
+  (interactive)
+
+  ;; Replace selected symbols to predefined entities in XML
+  (with-current-buffer (elfeed-org-export-opml)
+    (widen)
+    (let (
+          ($findReplaceMap
+           [
+            ["&" "&amp;"]]
+           ))
+      (mapc
+       (lambda ($x)
+         (widen)
+         (goto-char (point-min))
+         (while (search-forward (elt $x 0) nil t)
+           (replace-match (elt $x 1))))
+       $findReplaceMap))
+
+    ;; RSS Reader requires a text field
+    (goto-char (point-min))
+    (while (re-search-forward "title=\\(\"[^\"]*\"\\)" nil t)
+      (replace-match "title=\\1 text=\\1"))
+
+    ;; RSS Reader requires a type field
+    (goto-char (point-min))
+    (while (re-search-forward "xmlUrl" nil t)
+      (replace-match "type=\"rss\" xmlUrl"))
+    (write-file "elfeed.opml")))
+#+end_src
+
+#+begin_src elisp
+(map! :leader
+      (:prefix-map ("e" . "elfeed")
+       :desc "ElFeed" "e" #'elfeed
+       :desc "Export OPML" "o" #'my/export-opml))
+#+end_src
+
+#+RESULTS:
+: my/export-opml
