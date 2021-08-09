@@ -14,7 +14,13 @@ exec --no-startup-id xsettingsd &
 exec --no-startup-id compton -b
 exec --no-startup-id ibus-daemon --xim -d -r
 exec --no-startup-id dropbox start &
+exec --no-startup-id redshift-gtk &
 exec --no-startup-id emacs
+
+# i3 gnome
+exec --no-startup-id /usr/lib/gsd-xsettings
+exec_always --no-startup-id gnome-power-manager
+exec --no-startup-id gnome-flashback
 
 # start dmenu (a program launcher)
 bindsym $super+Shift+d exec i3-dmenu-desktop --dmenu="dmenu -i -fn 'Noto Sans:size=8'"
@@ -86,8 +92,8 @@ bindsym $super+Shift+6 move container to workspace 6
 # Lock, Shutdown and Restart
 bindsym $super+Shift+s exec systemctl poweroff
 bindsym $super+Shift+r exec systemctl reboot
-bindsym $super+Shift+l exec gnome-screensaver-command -l
-bindsym $super+Shift+h exec gnome-screensaver-command -l & systemctl hibernate
+bindsym $super+Shift+l exec --no-startup-id gnome-screensaver-command -l && systemctl suspend
+bindsym $super+Shift+h exec --no-startup-id gnome-screensaver-command -l && systemctl hibernate
 
 # Change Keyboard Layout
 bindsym $super+Shift+space exec /home/sheepsody/.config/i3/i3-keyboard-layout cycle 
@@ -104,9 +110,6 @@ mode "resize" {
         bindsym Return mode "default"
 }
 bindsym $super+r mode "resize"
-
-# Reload config file
-#
 
 # panel
 bar {

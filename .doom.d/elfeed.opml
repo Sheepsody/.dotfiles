@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<opml version="1.0">
+  <head>
+    <title>Elfeed-Org Export</title>
+  </head>
+  <body>
+    <outline title="World News" text="World News">
+      <outline title="BBC World" text="BBC World" type="rss"
+      xmlUrl="http://feeds.bbci.co.uk/news/world/rss.xml" />
+      <outline title="NY Times World" text="NY Times World"
+      type="rss"
+      xmlUrl="https://rss.nytimes.com/services/xml/rss/nyt/World.xml" />
+    </outline>
+    <outline title="Cybersecurity" text="Cybersecurity">
+      <outline title="Darknet Diaries" text="Darknet Diaries"
+      type="rss"
+      xmlUrl="https://feeds.megaphone.fm/darknetdiaries" />
+    </outline>
+    <outline title="Decentralization" text="Decentralization">
+      <outline title="Ethereum" text="Ethereum" type="rss"
+      xmlUrl="https://blog.ethereum.org/feed.xml" />
+    </outline>
+    <outline title="Venture Capitals" text="Venture Capitals">
+      <outline title="a16z" text="a16z" type="rss"
+      xmlUrl="https://feeds.simplecast.com/JGE3yC0V" />
+    </outline>
+    <outline title="AI &amp; ML" text="AI &amp; ML">
+      <outline title="Berkeley AI Research"
+      text="Berkeley AI Research" type="rss"
+      xmlUrl="https://bair.berkeley.edu/blog/feed.xml" />
+      <outline title="Lil'log" text="Lil'log" type="rss"
+      xmlUrl="https://lilianweng.github.io/lil-log/feed.xml" />
+      <outline title="The Gradient" text="The Gradient" type="rss"
+      xmlUrl="https://thegradient.pub/rss/" />
+      <outline title="Distill" text="Distill" type="rss"
+      xmlUrl="https://distill.pub/rss.xml" />
+    </outline>
+    <outline title="Companies" text="Companies">
+      <outline title="Facebook" text="Facebook" type="rss"
+      xmlUrl="https://research.fb.com/feed/" />
+    </outline>
+    <outline title="Tech" text="Tech">
+      <outline title="MIT TechReview" text="MIT TechReview"
+      type="rss" xmlUrl="https://www.technologyreview.com/feed/" />
+      <outline title="TechCrunch" text="TechCrunch" type="rss"
+      xmlUrl="https://feeds.feedburner.com/TechCrunch" />
+    </outline>
+    <outline title="Japanese" text="Japanese">
+      <outline title="Maggie Sensei" text="Maggie Sensei"
+      type="rss" xmlUrl="https://maggiesensei.com/feed/" />
+      <outline title="Tofugu" text="Tofugu" type="rss"
+      xmlUrl="https://www.tofugu.com/feed.xml" />
+    </outline>
+  </body>
+</opml>

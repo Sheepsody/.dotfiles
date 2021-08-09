@@ -5,7 +5,7 @@ export PATH=$HOME/bin:/usr/local/bin:$PATH
 export ZSH="/home/sheepsody/.oh-my-zsh"
 
 # Theme
-ZSH_THEME="spaceship"
+ZSH_THEME="robbyrussell"
 
 source $ZSH/oh-my-zsh.sh
 
