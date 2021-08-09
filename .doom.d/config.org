@@ -239,23 +239,32 @@
 
 (setq org-roam-publish-path "~/GitHub/MySecondBrainWebsite")
 (setq org-roam-notes-path "~/Dropbox/Roam")
-(setq org-roam-directory "~/Dropbox/Roam/")
 
 (use-package! org-roam
-  :after org
+  :ensure t
+  :custom
+  (org-roam-directory "~/Dropbox/Roam/")
   :config
   (setq org-roam-graph-executable "neato")
   (setq org-roam-graph-extra-config
         '(("overlap" . "false")))
   :config
   (setq org-roam-capture-templates
-        '(("p" "private" plain #'org-roam--capture-get-point "%?"
-           :file-name "%<%Y%m%d>-${slug}"
-           :head "#+TITLE: ${title}\n#+date: %t\n#+hugo_lastmod: %t\n#+ROAM_TAGS: private\n\n"
+        '(("p" "private" plain "%?"
+           :if-new
+           (file+head "%<%Y%m%d>-${slug}"
+                      "#+TITLE: ${title}\n#+date: %t\n#+hugo_lastmod: %t\n#+filetags: private\n\n")
            :unnarrowed t)
-          ("d" "draft" plain #'org-roam--capture-get-point "%?"
-           :file-name "%<%Y%m%d>-${slug}"
-           :head "#+TITLE: ${title}\n#+date: %t\n#+hugo_lastmod: %t\n#+ROAM_TAGS: draft\n\n"
+          ("d" "draft" plain "%?"
+           :if-new
+           (file+head "%<%Y%m%d>-${slug}"
+                      "#+TITLE: ${title}\n#+date: %t\n#+hugo_lastmod: %t\n#+filetags: draft\n\n")
+           :unnarrowed t)
+          ("r" "bibliography reference" plain
+           "%?"
+           :if-new
+           (file+head "refs/${citekey}.org"
+                      "#+title: ${title}\n#+author: ${author-or-editor}\n#+date: %t\n #+filetags: draft private")
            :unnarrowed t))))
 
 (use-package! websocket
@@ -289,9 +298,14 @@
 ;; Org Roam Markdown Export
 ;; Inspired from https://github.com/alexkehayias/emacs.d/
 
+(eval-when-compile
+  (require 'cl))
+
 (use-package ox-hugo
+  :after org-roam
   :config
   (setq org-hugo-date-format "%Y-%m-%d")
+  (setq org-hugo-base-dir "~/GitHub/MySecondBrainWebsite")
   :init
   ;; These functions need to be in :init otherwise they will not be
   ;; callable in an emacs --batch context which for some reason
@@ -305,31 +319,30 @@
                  (let ((begin (plist-get (first (cdr paragraph)) :begin))
                        (end (plist-get (first (cdr paragraph)) :end)))
                    (buffer-substring begin end)))))))
-
   ;; Include backlinks in org exported notes not tagged as private or
   ;; draft
-  (defun my/org-roam--backlinks-list (file)
-    (if (org-roam--org-roam-file-p file)
-        (--reduce-from
-         (concat acc (format "- [[file:%s][%s]]\n"
-                             (file-relative-name (car it) org-roam-directory)
-                             (org-roam-db--get-title (car it))))
-         ""
-         (org-roam-db-query
-          [:select :distinct [links:source]
-           :from links
-           :left :outer :join tags :on (= links:source tags:file)
-           :where (and (= dest $s1)
-                       (or (is tags:tags nil)
-                           (and
-                            (not-like tags:tags '%private%)
-                            (not-like tags:tags '%draft%))))]
-          file))
-      ""))
+  (defun my/org-roam--backlinks-list (id file)
+    (--reduce-from
+     (concat acc (format "- [[id:%s][%s]]\n#+begin_quote\n%s\n#+end_quote\n"
+                         (car it)
+                         (org-roam-node-title (org-roam-node-from-id (car it)))
+                         (my/org-roam--extract-note-body (org-roam-node-file (org-roam-node-from-id (car it))))))
+     ""
+     (org-roam-db-query
+      (format
+       ;; The percentage sign needs to be escaped twice because there
+       ;; is two format calls—once here and the other by emacsql
+       "SELECT id FROM (SELECT links.source AS id, group_concat(tags.tag) AS alltags FROM links LEFT OUTER JOIN tags ON links.source = tags.node_id WHERE links.type = '\"id\"' AND links.dest = '\"%s\"' GROUP BY links.source) Q WHERE alltags IS NULL OR (','||alltags||',' NOT LIKE '%%%%,\"private\",%%%%' AND ','||alltags||',' NOT LIKE '%%%%,\"draft\",%%%%')"
+       id))))
 
   (defun file-path-to-md-file-name (path)
     (let ((file-name (first (last (split-string path "/")))))
       (concat (first (split-string file-name "\\.")) ".md")))
+
+  (defun file-path-to-slug (path)
+    (let* ((file-name (car (last (split-string path "--"))))
+           (title (first (split-string file-name "\\."))))
+      (replace-regexp-in-string (regexp-quote "_") "-" title nil 'literal)))
 
   ;; Fetches all org-roam files and exports to hugo markdown
   ;; files. Adds in necessary hugo properties
@@ -339,25 +352,24 @@
     ;; Make sure the author is set
     (setq user-full-name "Victor Vialard")
 
-    (let ((files (mapcan
-                  (lambda (x) x)
-                  (org-roam-db-query
-                   [:select [files:file]
-                    :from files
-                    :left :outer :join tags :on (= files:file tags:file)
-                    :where (or (is tags:tags nil)
-                               (and
-                                (not-like tags:tags '%private%)
-                                (not-like tags:tags '%draft%)))]))))
-      (mapc
-       (lambda (f)
+    ;; Don't include any files tagged as private or
+    ;; draft. The way we filter tags doesn't work nicely
+    ;; with emacsql's DSL so just use a raw SQL query
+    ;; for clarity
+    (let ((notes (org-roam-db-query "SELECT id, file FROM (SELECT nodes.id, nodes.file, group_concat(tags.tag) AS alltags FROM nodes LEFT OUTER JOIN tags ON nodes.id = tags.node_id GROUP BY nodes.file) WHERE alltags is null or (','||alltags||',' not like '%%,\"private\",%%' and ','||alltags||',' not like '%%,\"draft\",%%')")))
+      (-map
+       (-lambda ((id file))
          ;; Use temporary buffer to prevent a buffer being opened for
          ;; each note file.
          (with-temp-buffer
-           (message "Working on: %s" f)
-           (insert-file-contents f)
+           (message "Working on: %s" file)
 
-           (goto-char (point-min))
+           (insert-file-contents file)
+
+           ;; Adding these tags must go after file content because it
+           ;; will include a :PROPERTIES: drawer as of org-roam v2
+           ;; which must be the first item on the page
+
            ;; Add in hugo tags for export. This lets you write the
            ;; notes without littering HUGO_* tags everywhere
            ;; HACK:
@@ -366,35 +378,41 @@
            ;; the buffer. Instead we explicitely add the name of the
            ;; exported .md file otherwise you would get prompted for
            ;; the output file name on every note.
+           (goto-char (point-min))
+           (re-search-forward ":END:")
+           (newline)
            (insert
-            (format "#+HUGO_BASE_DIR: %s\n#+HUGO_SECTION: posts\n#+EXPORT_FILE_NAME: %s\n"
+            (format "#+HUGO_BASE_DIR: %s\n#+HUGO_SECTION: ./posts\n#+EXPORT_FILE_NAME: %s\n"
                     org-roam-publish-path
-                    (file-path-to-md-file-name f)))
+                    (file-path-to-md-file-name file)))
+
+
+            (message (file-path-to-md-file-name file))
 
            ;; If this is a placeholder note (no content in the
            ;; body) then add default text. This makes it look ok when
            ;; showing note previews in the index and avoids a headline
            ;; followed by a headline in the note detail page.
-           (if (eq (my/org-roam--extract-note-body f) nil)
+           (if (eq (my/org-roam--extract-note-body file) nil)
                (progn
                  (goto-char (point-max))
                  (insert "\n/This note does not have a description yet./\n")))
 
-           ;; Add in backlinks because
+           ;; Add in backlinks (at the end of the file) because
            ;; org-export-before-processing-hook won't be useful the
            ;; way we are using a temp buffer
-           (let ((links (my/org-roam--backlinks-list f)))
-             (unless (string= links "")
-               (goto-char (point-max))
-               (insert (concat "\n* Links to this note\n") links)))
+           (let ((links (my/org-roam--backlinks-list id file)))
+             (if (not (string= links ""))
+                 (progn
+                   (goto-char (point-max))
+                   (insert (concat "\n* Links to this note\n") links))))
 
            (org-hugo-export-to-md)))
-       files)))
+       notes)))
 
   (map! :leader
         :desc "Export Roam notes with Ox-Hugo"
-        "n r h" #'org-roam-to-hugo-md)
-  )
+        "n r h" #'org-roam-to-hugo-md))
 
 ;; Update timestamps automatically when saving !
 (add-hook 'org-mode-hook (lambda ()
@@ -431,24 +449,16 @@
         bibtex-completion-notes-symbol "✎"
         bibtex-completion-bibliography "~/Dropbox/Roam/references.bib"
         bibtex-completion-library-path "~/Dropbox/Roam/pdf/"
-        bibtex-completion-notes-path "~/Dropbox/Roam/refs/"
-        bibtex-completion-notes-template-multiple-files
-        (concat
-         "${title}\n"
-         "#+hugo_lastmod: %t\n"
-         "#+roam_key: cite:${=key=}\n"
-         "#+ROAM_TAGS: private\n"
-         ":PROPERTIES:\n"
-         ":CUSTOM_ID: ${=key=}\n"
-         ":NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n"
-         ":AUTHOR: ${author-abbrev}\n"
-         ":JOURNAL: ${journaltitle}\n"
-         ":DATE: ${date}\n"
-         ":YEAR: ${year}\n"
-         ":DOI: ${doi}\n"
-         ":URL: ${url}\n"
-         ":END:\n\n"
-         )))
+        bibtex-completion-notes-path "~/Dropbox/Roam/refs/"))
+
+(use-package! org-roam-bibtex
+  :after org-roam
+  :config
+  (require 'org-ref)
+  (setq orb-preformat-keywords
+        '("citekey" "title" "url" "author-or-editor" "keywords" "file")
+        orb-process-file-keyword t
+        orb-file-field-extensions '("pdf")))
 
 ;; Tell org-ref to let helm-bibtex find notes for it
 (setq org-ref-notes-function

@@ -14,8 +14,9 @@
 (package! ox-hugo)
 (package! org-ref)
 (package! citeproc-org)
+(package! org-roam-bibtex
+  :recipe (:host github :repo "org-roam/org-roam-bibtex"))
 
-(package! org-roam-bibtex)
 (package! websocket)
 (package! org-roam-ui :recipe (:host github :repo "org-roam/org-roam-ui" :files ("*.el" "out")))
 
