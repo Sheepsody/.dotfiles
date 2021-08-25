@@ -440,18 +440,28 @@
   :after org
   :config
   (setq org-ref-bibliography-notes "~/Dropbox/Roam/refs/"
-        org-ref-default-bibliography '("~/Dropbox/Roam/references.bib")
-        org-ref-pdf-directory "~/Dropbox/Roam/pdf/"))
+        org-ref-default-bibliography '("~/Dropbox/Roam/references.bib")))
 
 (use-package! bibtex-completion
   :after org-ref
+  :ensure t
+  :init (autoload 'helm-bibtex "helm-bibtex" "" t)
   :config
-  (setq bibtex-completion-pdf-symbol "⌘"
-        bibtex-completion-pdf-field "file"
-        bibtex-completion-notes-symbol "✎"
+  (setq bibtex-completion-pdf-field "file"
         bibtex-completion-bibliography "~/Dropbox/Roam/references.bib"
-        bibtex-completion-library-path "~/Dropbox/Roam/pdf/"
-        bibtex-completion-notes-path "~/Dropbox/Roam/refs/"))
+        bibtex-completion-notes-path "~/Dropbox/Roam/refs/")
+
+  (defun my/org-ref-open-pdf-at-point ()
+    "Open the pdf for bibtex key under point if it exists."
+    (interactive)
+    (let* ((results (org-ref-get-bibtex-key-and-file))
+           (key (car results))
+           (pdf-file (car (bibtex-completion-find-pdf key))))
+      (if (file-exists-p pdf-file)
+          (find-file pdf-file) ; original in org-ref-help,
+                                        ; opens external viewer (org-open-file pdf-file)
+        (message "No PDF found for %s" key))))
+  (setq org-ref-open-pdf-function #'my/org-ref-open-pdf-at-point))
 
 (use-package! org-roam-bibtex
   :after org-roam
