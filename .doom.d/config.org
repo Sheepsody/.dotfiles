@@ -469,6 +469,23 @@
           (bibtex-completion-edit-notes
            (list (car (org-ref-get-bibtex-key-and-file thekey)))))))
 #+end_src
+** Download
+
+#+begin_src elisp
+(use-package org-download
+  :ensure t
+  :after org
+  :config
+  (setq org-download-method 'directory
+        org-download-image-dir "~/Dropbox/Roam/images/org-download"
+        org-download-heading-lvl nil
+        org-download-timestamp "%Y%m%d-%H%M%S_")
+  (add-hook 'dired-mode-hook 'org-download-enable)
+  :bind
+  (:map org-mode-map
+   (("s-Y" . org-download-screenshot)
+    ("s-y" . org-download-yank))))
+#+end_src
 
 * Languages
 ** Rust
