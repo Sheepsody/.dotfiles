@@ -1,4 +1,4 @@
-FROM silex/emacs:27.1-ci
+FROM silex/emacs:27-alpine-ci-cask
 
 USER root
 
@@ -15,5 +15,5 @@ RUN PATH="$HOME/.emacs.d/bin:$PATH" && \
 
 RUN emacs --batch --eval '(let (all-the-icons-install-fonts))'
 
-RUN apt-get update && apt-get install sqlite3
-
+RUN apk update \
+    && apk add sqlite
