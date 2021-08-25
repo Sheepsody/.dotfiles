@@ -104,6 +104,33 @@
 (setq org-html-head "<link rel=\"stylesheet\" href=\"https://rawgithub.com/edwardtufte/tufte-css/gh-pages/tufte.css\" type=\"text/css\" />")
 #+end_src
 
+** Org-Pomodoro
+
+#+begin_src elisp
+(use-package org-pomodoro
+  :after org
+  :ensure t
+  :commands (org-pomodoro)
+  :config
+  (setq
+   org-pomodoro-length 50
+   org-pomodoro-short-break-length 10)
+
+  (defun my/emacs-query-pomodoro ()
+    "Return the remaining pomodoro time"
+    (if (org-pomodoro-active-p)
+        (cl-case org-pomodoro-state
+          (:pomodoro
+           (format "Pomo: %d minutes - %s" (/ (org-pomodoro-remaining-seconds) 60) org-clock-heading))
+          (:short-break
+           (format "Short break time: %d minutes" (/ (org-pomodoro-remaining-seconds) 60)))
+          (:long-break
+           (format "Long break time: %d minutes" (/ (org-pomodoro-remaining-seconds) 60)))
+          (:overtime
+           (format "Overtime! %d minutes" (/ (org-pomodoro-remaining-seconds) 60))))
+      "No active pomo")))
+#+end_src
+
 ** Org-Clock
 
 #+begin_src elisp
