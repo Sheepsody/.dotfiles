@@ -15,7 +15,7 @@ exec --no-startup-id compton -b
 exec --no-startup-id ibus-daemon --xim -d -r
 exec --no-startup-id dropbox start &
 exec --no-startup-id redshift-gtk &
-exec --no-startup-id emacs
+exec_always --no-startup-id ~/.config/polybar/launch.sh &
 
 # i3 gnome
 exec --no-startup-id /usr/lib/gsd-xsettings
@@ -28,7 +28,7 @@ bindsym $super+d exec rofi -lines 12 -padding 18 -width 60 -location 0 -show dru
 
 # common apps keybinds
 bindsym Print exec scrot 'Cheese_%a-%d%b%y_%H.%M.png' -e 'viewnior ~/$f'
-bindsym $super+Shift+c exec emacs
+bindsym $super+Shift+c exec emacsclient --no-wait --create-frame
 
 # Change volume
 set $refresh_i3status killall -SIGUSR1 i3status
@@ -71,6 +71,7 @@ bindsym $super+f fullscreen toggle
 
 # Container layout
 bindsym $super+Shift+f floating toggle
+bindsym $super+Shift+t focus mode_toggle
 bindsym $super+w layout toggle
 
 # switch to workspace
@@ -111,22 +112,6 @@ mode "resize" {
 }
 bindsym $super+r mode "resize"
 
-# panel
-bar {
-   colors {
-        background #2f343f
-        statusline #2f343f
-        separator #4b5262
-
-        # colour of border, background, and text
-        focused_workspace       #2f343f #bf616a #d8dee8
-        active_workspace        #2f343f #2f343f #d8dee8
-        inactive_workspace      #2f343f #2f343f #d8dee8
-        urgent_workspacei       #2f343f #ebcb8b #2f343f
-    }
-    status_command i3status | /home/sheepsody/.config/i3/i3-keyboard-layout i3status | /home/sheepsody/.config/i3/get_brightness
-}
-
 # colour of border, background, text, indicator, and child_border
 client.focused              #bf616a #2f343f #d8dee8 #bf616a #d8dee8
 client.focused_inactive     #2f343f #2f343f #d8dee8 #2f343f #2f343f
@@ -134,3 +119,4 @@ client.unfocused            #2f343f #2f343f #d8dee8 #2f343f #2f343f
 client.urgent               #2f343f #2f343f #d8dee8 #2f343f #2f343f
 client.placeholder          #2f343f #2f343f #d8dee8 #2f343f #2f343f
 client.background           #2f343f
+
