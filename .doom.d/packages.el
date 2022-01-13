@@ -16,6 +16,8 @@
 (package! citeproc-org)
 (package! org-roam-bibtex
   :recipe (:host github :repo "org-roam/org-roam-bibtex"))
+(package! org-clock-csv)
+(package! org-noter)
 
 (package! websocket)
 (package! org-roam-ui :recipe (:host github :repo "org-roam/org-roam-ui" :files ("*.el" "out")))

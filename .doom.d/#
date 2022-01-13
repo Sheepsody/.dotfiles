@@ -76,7 +76,6 @@
 (custom-set-variables
  '(org-agenda-files '("~/Dropbox/emacs/Org/inbox.org"
                       "~/Dropbox/emacs/Org/calendar.org"
-                      "~/Dropbox/emacs/Org/habits.org"
                       "~/Dropbox/emacs/Org/gtd.org")))
 
 (after! org
@@ -85,6 +84,9 @@
   (setq org-archive-location "~/Dropbox/emacs/Org/archive.org::* FILE: %s")
   (setq org-default-notes-file (concat org-directory "inbox.org"))
   (setq org-columns-default-format "%50ITEM(Task) %TODO %2PRIORITY %10Effort(Effort){:} %10CLOCKSUM %TAGS")
+
+  ;; Save after toggle TODO state
+  (add-hook 'org-trigger-hook 'save-buffer)
 
   ;; Capture templates
   (setq org-capture-templates
@@ -202,25 +204,29 @@
 
   (setq org-agenda-custom-commands
         '(("z" "Custom GTD view"
-           ((agenda "" ((org-agenda-span 'day)
-                        (org-agenda-overriding-header "")
+           ((agenda "" ((org-agenda-overriding-header "")
                         (org-super-agenda-groups
                          '((:name "Today"
-                            :discard (:habit t)
+                            :discard (:tag ("daily" "weekly"))
                             :time-grid t
                             :date today
                             :order 1)))))
             (alltodo "" ((org-agenda-overriding-header "")
                          (org-super-agenda-groups
                           '(
-                            (:name "Habits"
-                             :and (:habit t
+                            (:name "Dailies"
+                             :and (:tag "daily"
                                    :not (:scheduled future))
                              :order 9)
-                            (:discard (:habit t))
+                            (:name "Weeklies"
+                             :and (:tag "weekly"
+                                   :not (:scheduled future))
+                             :order 10)
+                            (:discard (:tag ("daily" "weekly")))
                             (:name "Waiting"
                              :todo "WAITING"
                              :order 25)
+
                             (:name "Immediatly"
                              :and (:priority "A" :todo "NEXT")
                              :order 1)
@@ -294,10 +300,6 @@
   (add-to-list 'org-capture-templates
                `("j" "Journal entry" entry (function org-journal-find-location)
                  "** %(format-time-string org-journal-time-format)%^{Title}\n%i%?"
-                 :jump-to-captured t :immediate-finish t))
-  (add-to-list 'org-capture-templates
-               `("d" "Daily journal" entry (function org-journal-find-location)
-                 (file ,(expand-file-name "~/Dropbox/emacs/Org/daily.org"))
                  :jump-to-captured t :immediate-finish t))
   (add-to-list 'org-capture-templates
                `("w" "Weekly review" entry (function org-journal-find-location)
@@ -556,11 +558,12 @@
 ** Download
 
 #+begin_src elisp
+(after! org
   (setq org-download-method 'directory
         org-download-image-dir "~/Dropbox/emacs/Roam/images/org-download"
         org-download-heading-lvl nil
-        org-download-timestamp "%Y%m%d-%H%M%S_"
-        org-image-actual-width 300)
+        org-download-timestamp "%Y%m%d-%H%M%S_")
+  (setq org-image-actual-width 300))
 #+end_src
 
 ** Org Noter

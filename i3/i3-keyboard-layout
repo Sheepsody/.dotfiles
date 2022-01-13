@@ -16,7 +16,7 @@ set_kbdlayout() {
 
 cycle() {
   current_layout=$(get_kbdlayout | xargs)
-  layouts=("fr" "gb" "jp" "fr bepo" "fr") # add the first one at the end so that it cycles
+  layouts=("fr" "gb" "jp" "fr bepo" "gb dvorak" "fr") # add the first one at the end so that it cycles
   index=0
   while [ "${layouts[$index]}" != "$current_layout" ] && [ $index -lt "${#layouts[@]}" ]; do index=$[index +1]; done
   next_index=$[index +1]

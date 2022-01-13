@@ -430,4 +430,6 @@ margin-bottom = 5
 [module/pomodoro]
 type = custom/script
 exec = ~/.config/polybar/pomodoro.sh
+format-prefix = " "
+format-underline = #99c2ff
 interval = 5
