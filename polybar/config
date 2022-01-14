@@ -57,7 +57,7 @@ font-2 = siji:pixelsize=10;1
 
 modules-left = i3
 modules-center = pomodoro date
-modules-right = filesystem pulseaudio xkeyboard memory cpu wlan eth battery temperature powermenu
+modules-right = filesystem pulseaudio xkeyboard memory cpu wlan eth vpn-openvpn-status battery temperature powermenu
 
 tray-position = right
 tray-padding = 2
@@ -433,3 +433,9 @@ exec = ~/.config/polybar/pomodoro.sh
 format-prefix = " "
 format-underline = #99c2ff
 interval = 5
+
+[module/vpn-openvpn-status]
+type = custom/script
+exec = ~/.config/polybar/vpn-openvpn-status.sh
+interval = 5
+format-underline = #4bffdc
