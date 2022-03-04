@@ -695,11 +695,18 @@
 
 #+begin_src elisp
 ;; ElFeed RSS reader
-(use-package! elfeed-org
-  :ensure t
+(use-package elfeed
+  :defer t
+  :init
+  (elfeed-protocol-enable)
   :config
-  (elfeed-org)
-  (setq rmh-elfeed-org-files (list "~/Dropbox/emacs/Org/elfeed.org")))
+  (setq elfeed-use-curl t)
+  (setq elfeed-db-directory "~/.elfeed/")
+  (setq elfeed-protocol-enabled-protocols '(fever ))
+  (setq elfeed-feeds    '((
+                           "fever+https://Sheepsody@rss.sheepsody.com"
+                           :api-url "https://Sheepsody@rss.sheepsody.com/api/fever.php"
+                           :password "R%6q5zdCm4NgddTW"))))
 #+end_src
 
 #+begin_src elisp
