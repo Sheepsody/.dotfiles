@@ -1,39 +1,35 @@
 # If you come from bash you might have to change your $PATH.
 export PATH=$HOME/bin:/usr/local/bin:$PATH
 
-# Path to your oh-my-zsh installation.
-export ZSH="/home/sheepsody/.oh-my-zsh"
-
 # Theme
 ZSH_THEME="robbyrussell"
 
+# Path to your oh-my-zsh installation.
+export ZSH="/Users/victorvialard/.oh-my-zsh"
 source $ZSH/oh-my-zsh.sh
-
-# User configuration
 
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='vim'
-else
-  export EDITOR='nvim'
-fi
+export EDITOR='vim'
 
 # Compilation flags
 export ARCHFLAGS="-arch x86_64"
 
 plugins=(
         fzf
+        aws
+        brew
+        docker
+        fzf
+        gcloud
+        tmux
         git
         kubectl
         cargo
-        docker
-        zsh-pyenv
+	pyenv
 )
-
-alias vim="nvim"
 
 # Loading fzf completion
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -55,5 +51,17 @@ eval "$(pyenv virtualenv-init -)"
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
-eval $(opam env)
 [ -f "/home/sheepsody/.ghcup/env" ] && source "/home/sheepsody/.ghcup/env" # ghcup-env
+
+# Private configuration
+if [ -f ~/.zshrc.private ]; then
+    source ~/.zshrc.private
+else
+    print "WARNING: private config .private.zshrc not found"
+fi
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/victorvialard/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/victorvialard/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/victorvialard/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/victorvialard/google-cloud-sdk/completion.zsh.inc'; fi
