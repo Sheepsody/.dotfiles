@@ -9,7 +9,7 @@ font pango: Noto Sans 8
 bindsym $super+Return exec i3-sensible-terminal
 
 #autostart
-exec --no-startup-id feh --randomize --bg-fill ./Pictures/Wallpapers/*
+exec --no-startup-id feh --randomize --bg-fill ~/Pictures/Wallpapers/*
 exec --no-startup-id xsettingsd &
 exec --no-startup-id compton -b
 exec --no-startup-id ibus-daemon --xim -d -r

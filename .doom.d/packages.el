@@ -19,6 +19,9 @@
 (package! org-clock-csv)
 (package! org-noter)
 
+(package! elfeed-org)
+(package! elfeed-web)
+
 (package! websocket)
 (package! org-roam-ui :recipe (:host github :repo "org-roam/org-roam-ui" :files ("*.el" "out")))
 (package! org-download)
@@ -26,3 +29,11 @@
 ;; MISC
 
 (package! leetcode)
+
+;; Fix issue Magit
+(package! gitconfig-mode
+  :recipe (:host github :repo "magit/git-modes"
+           :files ("gitconfig-mode.el")))
+(package! gitignore-mode
+  :recipe (:host github :repo "magit/git-modes"
+           :files ("gitignore-mode.el")))

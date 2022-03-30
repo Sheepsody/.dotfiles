@@ -67,40 +67,51 @@
 #+end_src
 
 * Org-Mode
+** Locations
+
+#+begin_src elisp
+(setq org-directory (expand-file-name "~/Dropbox/emacs/Org/"))
+(setq org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/"))
+#+end_src
+
 ** Org
 
 #+begin_src elisp
 ;; Org Directory
-(setq org-directory (expand-file-name "~/Dropbox/emacs/Org/"))
 (setq org-image-actual-width '(600))
 (custom-set-variables
- '(org-agenda-files '("~/Dropbox/emacs/Org/inbox.org"
-                      "~/Dropbox/emacs/Org/calendar.org"
-                      "~/Dropbox/emacs/Org/habits.org"
-                      "~/Dropbox/emacs/Org/gtd.org")))
+ '(org-agenda-files '(
+                      concat(org-directory "inbox.org")
+                      concat(org-directory "habits.org")
+                      concat(org-directory "calendar.org")
+                      concat(org-directory "gtd.org"))))
 
 (after! org
   :ensure t
   :config
-  (setq org-archive-location "~/Dropbox/emacs/Org/archive.org::* FILE: %s")
+  (setq org-id-extra-files (directory-files-recursively org-roam-directory "\.org$"))
+  (setq org-archive-location (concat org-directory "archive.org::* FILE: %s"))
   (setq org-default-notes-file (concat org-directory "inbox.org"))
   (setq org-columns-default-format "%50ITEM(Task) %TODO %2PRIORITY %10Effort(Effort){:} %10CLOCKSUM %TAGS")
+
+  ;; Open pdf in emacs
+  (add-to-list 'org-file-apps '("\\.pdf\\'" . org-pdfview-open))
 
   ;; Capture templates
   (setq org-capture-templates
         '(("t" "Todo [inbox]" entry
-           (file "~/Dropbox/emacs/Org/inbox.org")
+           (file (concat org-directory "inbox.org"))
            "* TODO %i%?")
           ("o" "One-Off [gtd]" entry
-           (file+headline "~/Dropbox/emacs/Org/gtd.org" "One-Off")
-           "* TODO %i%?")
+           (file+headline (concat org-directory "gtd.org") "One-Off")
+           "* %^{Event status?|TODO|NEXT|WAITING|DONE } %i%?")
           ("c" "Org-protocol capture" entry
-           (file "~/Dropbox/emacs/Org/inbox.org")
+           (file (concat org-directory "inbox.org"))
            "* %a\n/Entered on:/ %U\n"
            :immediate-finish t)
           ("e" "Event" entry
-           (file "~/Dropbox/emacs/Org/calendar.org")
-           "* %^{Event status?||TODO |NEXT }%^{Title}\nSCHEDULED: %^t\n%?")))
+           (file (concat org-directory "calendar.org"))
+           "* %^{Event status?||TODO|NEXT|MEETING}%^{Title}\nSCHEDULED: %^t\n%?")))
 
   ;; Keywords
   (setq org-todo-keywords
@@ -115,6 +126,21 @@
           ("CANCELLED" :foreground "#73797e") ;; gray
           )))
 
+(defun my-org-summarize-task-status ()
+  "Count number of tasks by status.
+      Probably should make this a dblock someday."
+  (interactive)
+  (let (result)
+    (org-map-entries
+     (lambda ()
+       (let ((todo (elt (org-heading-components) 2)))
+         (if todo
+             (if (assoc todo result)
+                 (setcdr (assoc todo result)
+                         (1+ (cdr (assoc todo result))))
+               (setq result (cons (cons todo 1) result)))))))
+    (message "%s" (mapconcat (lambda (x) (format "%s: %d" (car x) (cdr x)))
+                             result " | "))))
 ;; Stylesheet for HTML exports
 (setq org-html-head "<link rel=\"stylesheet\" href=\"https://rawgithub.com/edwardtufte/tufte-css/gh-pages/tufte.css\" type=\"text/css\" />")
 
@@ -213,9 +239,9 @@
             (alltodo "" ((org-agenda-overriding-header "")
                          (org-super-agenda-groups
                           '(
+                            (:discard (:scheduled future))
                             (:name "Habits"
-                             :and (:habit t
-                                   :not (:scheduled future))
+                             :habit t
                              :order 9)
                             (:discard (:habit t))
                             (:name "Waiting"
@@ -274,7 +300,7 @@
   :after org
   :ensure t
   :config
-  (setq org-journal-dir "~/Dropbox/emacs/Org/Journal/"
+  (setq org-journal-dir (concat org-directory "Journal/")
         org-journal-file-type 'weekly
         org-journal-date-prefix "* "
         org-journal-file-format "%Y-%m-%d.org"
@@ -297,11 +323,11 @@
                  :jump-to-captured t :immediate-finish t))
   (add-to-list 'org-capture-templates
                `("d" "Daily journal" entry (function org-journal-find-location)
-                 (file ,(expand-file-name "~/Dropbox/emacs/Org/daily.org"))
+                 (file ,(expand-file-name (concat org-directory "methodology/daily.org")))
                  :jump-to-captured t :immediate-finish t))
   (add-to-list 'org-capture-templates
                `("w" "Weekly review" entry (function org-journal-find-location)
-                 (file ,(expand-file-name "~/Dropbox/emacs/Org/weekly.org"))
+                 (file ,(expand-file-name (concat org-directory "weekly.org")))
                  :jump-to-captured t :immediate-finish t)))
 #+end_src
 
@@ -310,13 +336,10 @@
 #+begin_src elisp
 ;; Org Roam
 
-(setq org-roam-publish-path "~/GitHub/MySecondBrainWebsite")
-(setq org-roam-notes-path "~/Dropbox/emacs/Roam")
+(setq org-roam-notes-path org-roam-directory)
 
 (use-package! org-roam
   :ensure t
-  :custom
-  (org-roam-directory "~/Dropbox/emacs/Roam/")
   :config
   (setq org-roam-graph-executable "neato")
   (setq org-roam-graph-extra-config
@@ -347,14 +370,10 @@
   :after org-roam
   :config
   (setq org-roam-ui-sync-theme t
-        org-roam-ui-follow t
+        org-roam-ui-follow nil
         org-roam-ui-update-on-save t
         org-roam-ui-open-on-start t))
-#+end_src
 
-** Deft
-
-#+begin_src elisp
 ;; Deft Configuration
 ;; Used for quick browsing of plain text notes
 
@@ -362,7 +381,7 @@
   :after org
   :config
   (setq deft-default-extension "org"
-        deft-directory "~/Dropbox/emacs/Roam/"
+        deft-directory org-roam-directory
         deft-use-filename-as-title t
         deft-recursive t))
 #+end_src
@@ -398,7 +417,7 @@
   ;; draft
   (defun my/org-roam--backlinks-list (id file)
     (--reduce-from
-     (concat acc (format "- [[id:%s][%s]]\n#+begin_quote\n%s\n#+end_quote\n"
+     (concat acc (format "- [[id:%s][%s]]\n"
                          (car it)
                          (org-roam-node-title (org-roam-node-from-id (car it)))
                          (my/org-roam--extract-note-body (org-roam-node-file (org-roam-node-from-id (car it))))))
@@ -407,7 +426,7 @@
       (format
        ;; The percentage sign needs to be escaped twice because there
        ;; is two format calls—once here and the other by emacsql
-       "SELECT id FROM (SELECT links.source AS id, group_concat(tags.tag) AS alltags FROM links LEFT OUTER JOIN tags ON links.source = tags.node_id WHERE links.type = '\"id\"' AND links.dest = '\"%s\"' GROUP BY links.source) Q WHERE alltags IS NULL OR (','||alltags||',' NOT LIKE '%%%%,\"private\",%%%%' AND ','||alltags||',' NOT LIKE '%%%%,\"draft\",%%%%')"
+       "SELECT id FROM (SELECT links.source AS id, group_concat(tags.tag) AS alltags FROM links LEFT OUTER JOIN tags ON links.source = tags.node_id WHERE links.type = '\"id\"' AND links.dest = '\"%s\"' GROUP BY links.source) Q  WHERE alltags IS NULL OR (','||alltags||',' NOT LIKE '%%%%,\"private\",%%%%' AND ','||alltags||',' NOT LIKE '%%%%,\"draft\",%%%%') "
        id))))
 
   (defun file-path-to-md-file-name (path)
@@ -431,7 +450,7 @@
     ;; draft. The way we filter tags doesn't work nicely
     ;; with emacsql's DSL so just use a raw SQL query
     ;; for clarity
-    (let ((notes (org-roam-db-query "SELECT id, file FROM (SELECT nodes.id, nodes.file, group_concat(tags.tag) AS alltags FROM nodes LEFT OUTER JOIN tags ON nodes.id = tags.node_id GROUP BY nodes.file) WHERE alltags is null or (','||alltags||',' not like '%%,\"private\",%%' and ','||alltags||',' not like '%%,\"draft\",%%')")))
+    (let ((notes (org-roam-db-query "SELECT id, file FROM (SELECT nodes.id, nodes.file, group_concat(tags.tag) AS alltags FROM nodes LEFT OUTER JOIN tags ON nodes.id = tags.node_id GROUP BY nodes.file)  WHERE alltags is null or (','||alltags||',' not like '%%,\"private\",%%' and ','||alltags||',' not like '%%,\"draft\",%%') ")))
       (-map
        (-lambda ((id file))
          ;; Use temporary buffer to prevent a buffer being opened for
@@ -458,7 +477,7 @@
            (newline)
            (insert
             (format "#+HUGO_BASE_DIR: %s\n#+HUGO_SECTION: ./posts\n#+EXPORT_FILE_NAME: %s\n"
-                    org-roam-publish-path
+                    org-hugo-base-dir
                     (file-path-to-md-file-name file)))
 
 
@@ -499,6 +518,9 @@
                            (add-hook 'before-save-hook 'time-stamp nil 'local)))
 #+end_src
 
+#+RESULTS:
+| (lambda nil (setq-local time-stamp-active t time-stamp-line-limit 18 time-stamp-start ^#\+hugo_lastmod: [ 	]* time-stamp-end $ time-stamp-format [%Y-%m-%d %a %H:%M:%S]) (add-hook 'before-save-hook 'time-stamp nil 'local)) | er/add-org-mode-expansions | org-ref-org-menu | (lambda nil (progn (set (make-local-variable 'time-stamp-active) t) (set (make-local-variable 'time-stamp-line-limit) 18) (set (make-local-variable 'time-stamp-start) ^#\+hugo_lastmod: [ 	]*) (set (make-local-variable 'time-stamp-end) $) (set (make-local-variable 'time-stamp-format) [%Y-%m-%d %a %H:%M:%S])) (add-hook 'before-save-hook 'time-stamp nil 'local)) | +lookup--init-org-mode-handlers-h | (closure ((hook . org-mode-hook) (--dolist-tail--) t) (&rest _) (add-hook 'before-save-hook 'org-encrypt-entries nil t)) | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | doom-disable-show-paren-mode-h | doom-disable-show-trailing-whitespace-h | +org-enable-auto-reformat-tables-h | +org-enable-auto-update-cookies-h | +org-make-last-point-visible-h | org-fancy-priorities-mode | org-superstar-mode | evil-org-mode | toc-org-enable | org-cdlatex-mode | writegood-mode | flyspell-mode | embrace-org-mode-hook | org-eldoc-load | +literate-enable-recompile-h |
+
 ** Citations
 
 #+begin_src elisp
@@ -508,12 +530,11 @@
   :config
   (citeproc-org-setup))
 
-
 (use-package! org-ref
   :after org
   :config
-  (setq org-ref-bibliography-notes "~/Dropbox/emacs/Roam/refs/"
-        org-ref-default-bibliography '("~/Dropbox/emacs/Roam/references.bib")))
+  (setq org-ref-bibliography-notes (concat org-roam-directory "refs/")
+        org-ref-default-bibliography '((concat org-roam-directory "references.bib"))))
 
 (use-package! bibtex-completion
   :after org-ref
@@ -521,8 +542,8 @@
   :init (autoload 'helm-bibtex "helm-bibtex" "" t)
   :config
   (setq bibtex-completion-pdf-field "file"
-        bibtex-completion-bibliography "~/Dropbox/emacs/Roam/references.bib"
-        bibtex-completion-notes-path "~/Dropbox/emacs/Roam/refs/")
+        bibtex-completion-bibliography (concat org-roam-directory "references.bib")
+        bibtex-completion-notes-path (concat org-roam-directory "refs/"))
 
   (defun my/org-ref-open-pdf-at-point ()
     "Open the pdf for bibtex key under point if it exists."
@@ -557,7 +578,7 @@
 
 #+begin_src elisp
   (setq org-download-method 'directory
-        org-download-image-dir "~/Dropbox/emacs/Roam/images/org-download"
+        org-download-image-dir (concat org-roam-directory "images/org-download")
         org-download-heading-lvl nil
         org-download-timestamp "%Y%m%d-%H%M%S_"
         org-image-actual-width 300)
@@ -569,7 +590,7 @@
 ;; Org-Noter config
 (after! org-noter
   (setq
-   org-noter-notes-search-path '("~/Dropbox/emacs/Roam/")
+   org-noter-notes-search-path '(org-roam-directory)
    org-noter-hide-other nil
    org-noter-separate-notes-from-heading t
    org-noter-always-create-frame nil)
@@ -590,6 +611,62 @@
    "m q" #'org-noter-kill-session))
 #+end_src
 
+** Elfeed
+
+#+begin_src elisp
+;; ElFeed RSS reader
+(use-package elfeed
+  :defer t
+  :config
+  (setq elfeed-use-curl t)
+  (setq elfeed-db-directory "~/.elfeed/"))
+
+(use-package elfeed-org
+  :ensure t
+  :config
+  (elfeed-org)
+  (setq rmh-elfeed-org-files (list (concat org-directory "elfeed/elfeed.org"))))
+#+end_src
+
+#+begin_src elisp
+(defun my/export-opml ()
+  "Exports Org-Elfeed config so it can be directly loaded into Android's RSS Reader"
+  (interactive)
+
+  ;; Replace selected symbols to predefined entities in XML
+  (with-current-buffer (elfeed-org-export-opml)
+    (widen)
+    (let (
+          ($findReplaceMap
+           [
+            ["&" "&amp;"]]
+           ))
+      (mapc
+       (lambda ($x)
+         (widen)
+         (goto-char (point-min))
+         (while (search-forward (elt $x 0) nil t)
+           (replace-match (elt $x 1))))
+       $findReplaceMap))
+
+    ;; RSS Reader requires a text field
+    (goto-char (point-min))
+    (while (re-search-forward "title=\\(\"[^\"]*\"\\)" nil t)
+      (replace-match "title=\\1 text=\\1"))
+
+    ;; RSS Reader requires a type field
+    (goto-char (point-min))
+    (while (re-search-forward "xmlUrl" nil t)
+      (replace-match "type=\"rss\" xmlUrl"))
+    (write-file (concat org-directory "elfeed/elfeed.opml"))))
+#+end_src
+
+#+begin_src elisp
+(map! :leader
+      (:prefix-map ("e" . "elfeed")
+       :desc "ElFeed" "e" #'elfeed
+       :desc "Export OPML" "o" #'my/export-opml))
+#+end_src
 * Languages
 ** Rust
 
@@ -684,6 +761,14 @@
 #+RESULTS:
 
 * Other
+** Shell
+
+#+begin_src elisp
+(setenv "SHELL" "/bin/zsh")
+(setq explicit-shell-file-name "/bin/zsh")
+(setq shell-file-name "/bin/zsh")
+#+end_src
+
 ** Private Settings
 
 #+begin_src elisp
@@ -691,60 +776,3 @@
   (load! "private-config.el"))
 #+end_src
 
-** Elfeed
-
-#+begin_src elisp
-;; ElFeed RSS reader
-(use-package elfeed
-  :defer t
-  :init
-  (elfeed-protocol-enable)
-  :config
-  (setq elfeed-use-curl t)
-  (setq elfeed-db-directory "~/.elfeed/")
-  (setq elfeed-protocol-enabled-protocols '(fever ))
-  (setq elfeed-feeds    '((
-                           "fever+https://Sheepsody@rss.sheepsody.com"
-                           :api-url "https://Sheepsody@rss.sheepsody.com/api/fever.php"
-                           :password "R%6q5zdCm4NgddTW"))))
-#+end_src
-
-#+begin_src elisp
-(defun my/export-opml ()
-  "Exports Org-Elfeed config so it can be directly loaded into Android's RSS Reader"
-  (interactive)
-
-  ;; Replace selected symbols to predefined entities in XML
-  (with-current-buffer (elfeed-org-export-opml)
-    (widen)
-    (let (
-          ($findReplaceMap
-           [
-            ["&" "&amp;"]]
-           ))
-      (mapc
-       (lambda ($x)
-         (widen)
-         (goto-char (point-min))
-         (while (search-forward (elt $x 0) nil t)
-           (replace-match (elt $x 1))))
-       $findReplaceMap))
-
-    ;; RSS Reader requires a text field
-    (goto-char (point-min))
-    (while (re-search-forward "title=\\(\"[^\"]*\"\\)" nil t)
-      (replace-match "title=\\1 text=\\1"))
-
-    ;; RSS Reader requires a type field
-    (goto-char (point-min))
-    (while (re-search-forward "xmlUrl" nil t)
-      (replace-match "type=\"rss\" xmlUrl"))
-    (write-file (concat org-directory "elfeed.opml"))))
-#+end_src
-
-#+begin_src elisp
-(map! :leader
-      (:prefix-map ("e" . "elfeed")
-       :desc "ElFeed" "e" #'elfeed
-       :desc "Export OPML" "o" #'my/export-opml))
-#+end_src

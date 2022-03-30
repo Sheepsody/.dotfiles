@@ -14,13 +14,6 @@ source $ZSH/oh-my-zsh.sh
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
 
-# Preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='vim'
-else
-  export EDITOR='nvim'
-fi
-
 # Compilation flags
 export ARCHFLAGS="-arch x86_64"
 
@@ -33,10 +26,11 @@ plugins=(
         zsh-pyenv
 )
 
-alias vim="nvim"
-
 # Loading fzf completion
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# Emacs
+export EHSELL=/bin/zsh
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 
@@ -54,6 +48,3 @@ eval "$(pyenv virtualenv-init -)"
 
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
-
-eval $(opam env)
-[ -f "/home/sheepsody/.ghcup/env" ] && source "/home/sheepsody/.ghcup/env" # ghcup-env
