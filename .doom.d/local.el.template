@@ -1,0 +1,6 @@
+;;; ../GitHub/.dotfiles/.doom.d/local.el -*- lexical-binding: t; -*-
+
+(setq org-directory (expand-file-name "~/Org/"))
+(setq org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/"))
+(setq elfeed-db-directory (expand-file-name "~/Dropbox/emacs/.elfeed/"))
+(setq rmh-elfeed-org-files (list (expand-file-name "~/Dropbox/emacs/Org/elfeed/elfeed.org")))

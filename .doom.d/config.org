@@ -2,6 +2,11 @@
 #+AUTHOR: Victor Vialard
 #+STARTUP: fold
 
+#+begin_src elisp
+;; Contant file location depending on working station
+(load-file "~/.doom.d/local.el")
+#+end_src
+
 * General
 ** Personal Informations
 
@@ -67,20 +72,6 @@
 #+end_src
 
 * Org-Mode
-** Locations
-
-#+begin_src elisp
-;; Contant file location depending on working station
-(if (string-equal system-name "Victors-MacBook-Pro.local")
-    ((setq org-directory (expand-file-name "~/Org/")
-           org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/")
-           elfeed-db-directory "~/.elfeed/"))
-  ;; Else
-  ((setq org-directory (expand-file-name "~/Dropbox/emacs/Org/")
-         org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/")
-         elfeed-db-directory "~/Dropbox/emacs/.elfeed/")))
-#+end_src
-
 ** Org
 
 #+begin_src elisp
@@ -626,8 +617,7 @@
 (use-package elfeed
   :defer t
   :config
-  (setq elfeed-use-curl t
-        rmh-elfeed-org-files (list (concat org-directory "elfeed/elfeed.org"))))
+  (setq elfeed-use-curl t))
 
 (use-package elfeed-org
   :ensure t

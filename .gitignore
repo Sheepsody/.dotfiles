@@ -1,2 +1,3 @@
 .doom.d/*config.el
 /.doom.d/custom.el
+/.doom.d/local.el
