@@ -70,8 +70,11 @@
 ** Locations
 
 #+begin_src elisp
-(setq org-directory (expand-file-name "~/Dropbox/emacs/Org/"))
+(setq org-directory (expand-file-name "~/Org/"))
 (setq org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/"))
+
+(setq elfeed-db-directory "~/.elfeed/")
+(setq rmh-elfeed-org-files (list (concat org-directory "elfeed/elfeed.org")))
 #+end_src
 
 ** Org
@@ -81,10 +84,10 @@
 (setq org-image-actual-width '(600))
 (custom-set-variables
  '(org-agenda-files (list
-                      (concat org-directory "inbox.org")
-                      (concat org-directory "habits.org")
-                      (concat org-directory "calendar.org")
-                      (concat org-directory "gtd.org"))))
+                     (concat org-directory "inbox.org")
+                     (concat org-directory "habits.org")
+                     (concat org-directory "calendar.org")
+                     (concat org-directory "gtd.org"))))
 
 (after! org
   :ensure t
@@ -619,14 +622,12 @@
 (use-package elfeed
   :defer t
   :config
-  (setq elfeed-use-curl t)
-  (setq elfeed-db-directory "~/.elfeed/"))
+  (setq elfeed-use-curl t))
 
 (use-package elfeed-org
   :ensure t
   :config
-  (elfeed-org)
-  (setq rmh-elfeed-org-files (list (concat org-directory "elfeed/elfeed.org"))))
+  (elfeed-org))
 #+end_src
 
 #+begin_src elisp
