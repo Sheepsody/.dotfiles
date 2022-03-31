@@ -99,19 +99,20 @@
 
   ;; Capture templates
   (setq org-capture-templates
-        '(("t" "Todo [inbox]" entry
-           (file (concat org-directory "inbox.org"))
-           "* TODO %i%?")
-          ("o" "One-Off [gtd]" entry
-           (file+headline (concat org-directory "gtd.org") "One-Off")
-           "* %^{Event status?|TODO|NEXT|WAITING|DONE } %i%?")
-          ("c" "Org-protocol capture" entry
-           (file (concat org-directory "inbox.org"))
-           "* %a\n/Entered on:/ %U\n"
-           :immediate-finish t)
-          ("e" "Event" entry
-           (file (concat org-directory "calendar.org"))
-           "* %^{Event status?||TODO|NEXT|MEETING}%^{Title}\nSCHEDULED: %^t\n%?")))
+        `(
+         ("t" "Todo [inbox]" entry
+          (file ,(concat org-directory "inbox.org"))
+          "* TODO %i%?")
+         ("o" "One-Off [gtd]" entry
+          (file+headline ,(concat org-directory "gtd.org") "One-Off")
+          "* %^{Event status?|TODO|NEXT|WAITING|DONE } %i%?")
+         ("c" "Org-protocol capture" entry
+          (file ,(concat org-directory "inbox.org"))
+          "* %a\n/Entered on:/ %U\n"
+          :immediate-finish t)
+         ("e" "Event" entry
+          (file ,(concat org-directory "calendar.org"))
+          "* %^{Event status?||TODO|NEXT|MEETING}%^{Title}\nSCHEDULED: %^t\n%?")))
 
   ;; Keywords
   (setq org-todo-keywords
