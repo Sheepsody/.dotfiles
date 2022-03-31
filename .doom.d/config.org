@@ -4,6 +4,7 @@
 
 #+begin_src elisp
 ;; Contant file location depending on working station
+;; See example in local.el.template and copy to modify it
 (load-file "~/.doom.d/local.el")
 #+end_src
 
