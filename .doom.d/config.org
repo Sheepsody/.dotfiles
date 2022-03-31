@@ -70,16 +70,15 @@
 ** Locations
 
 #+begin_src elisp
+;; Contant file location depending on working station
 (if (string-equal system-name "Victors-MacBook-Pro.local")
-    ((setq org-directory (expand-file-name "~/Org/"))
-     org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/")
-     elfeed-db-directory "~/.elfeed/"
-     rmh-elfeed-org-files (list (concat org-directory "elfeed/elfeed.org")))
+    ((setq org-directory (expand-file-name "~/Org/")
+           org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/")
+           elfeed-db-directory "~/.elfeed/"))
   ;; Else
-  ((setq org-directory (expand-file-name "cccccc~/Org/"))
-   org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/")
-   elfeed-db-directory "~/.elfeed/"
-   rmh-elfeed-org-files (list (concat org-directory "elfeed/elfeed.org"))))
+  ((setq org-directory (expand-file-name "~/Dropbox/emacs/Org/")
+         org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/")
+         elfeed-db-directory "~/Dropbox/emacs/.elfeed/")))
 #+end_src
 
 ** Org
@@ -627,7 +626,8 @@
 (use-package elfeed
   :defer t
   :config
-  (setq elfeed-use-curl t))
+  (setq elfeed-use-curl t
+        rmh-elfeed-org-files (list (concat org-directory "elfeed/elfeed.org"))))
 
 (use-package elfeed-org
   :ensure t
