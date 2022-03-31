@@ -70,11 +70,16 @@
 ** Locations
 
 #+begin_src elisp
-(setq org-directory (expand-file-name "~/Org/"))
-(setq org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/"))
-
-(setq elfeed-db-directory "~/.elfeed/")
-(setq rmh-elfeed-org-files (list (concat org-directory "elfeed/elfeed.org")))
+(if (string-equal system-name "Victors-MacBook-Pro.local")
+    ((setq org-directory (expand-file-name "~/Org/"))
+     org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/")
+     elfeed-db-directory "~/.elfeed/"
+     rmh-elfeed-org-files (list (concat org-directory "elfeed/elfeed.org")))
+  ;; Else
+  ((setq org-directory (expand-file-name "cccccc~/Org/"))
+   org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/")
+   elfeed-db-directory "~/.elfeed/"
+   rmh-elfeed-org-files (list (concat org-directory "elfeed/elfeed.org"))))
 #+end_src
 
 ** Org
