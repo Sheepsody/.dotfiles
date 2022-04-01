@@ -625,10 +625,18 @@
   (elfeed-org))
 
 ;; Elfeed star articles
+;; See https://tecosaur.github.io/emacs-config/config.html#:~:text=4.4.%20Newsfeed-,%23,-RSS%20feeds%20are
 (defalias 'elfeed-toggle-star
   (elfeed-expose #'elfeed-search-toggle-all 'star))
 (map! :map elfeed-search-mode-map
+      :after elfeed-search
       :n "m" #'elfeed-toggle-star)
+
+(defface star-elfeed-entry
+  '((t (:foreground "#ECBE7B" :slant italic)))
+  "title face in elfeed show buffer")
+(push '(star star-elfeed-entry)
+      elfeed-search-face-alist)
 #+end_src
 
 #+begin_src elisp
