@@ -5,3 +5,6 @@
 
 [merge]
     conflictstyle = diff3
+[user]
+	name = Victor Vialard
+	email = vvialard@hotmail.fr
