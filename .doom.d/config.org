@@ -623,6 +623,12 @@
   :ensure t
   :config
   (elfeed-org))
+
+;; Elfeed star articles
+(defalias 'elfeed-toggle-star
+  (elfeed-expose #'elfeed-search-toggle-all 'star))
+(map! :map elfeed-search-mode-map
+      :n "m" #'elfeed-toggle-star)
 #+end_src
 
 #+begin_src elisp
