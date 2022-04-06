@@ -581,11 +581,21 @@
 ** Download
 
 #+begin_src elisp
+(use-package! org-download
+  :after org
+  :config
+
+  (setq-default org-download-image-dir (concat org-roam-directory "images/org-download"))
   (setq org-download-method 'directory
-        org-download-image-dir (concat org-roam-directory "images/org-download")
         org-download-heading-lvl nil
+        org-download-screenshot-method "screencapture -i %s"
+        org-download-delete-image-after-download t
         org-download-timestamp "%Y%m%d-%H%M%S_"
         org-image-actual-width 300)
+
+  (map! :map org-mode-map
+        :localleader
+        ("a c" #'org-download-screenshot)))
 #+end_src
 
 ** Org Noter

@@ -156,7 +156,6 @@
        (ocaml +lsp)             ; an objective camel
        (org                ; organize your plain life in plain text
         +roam2
-        +dragndrop
         +journal
         +pretty
         +pomodoro)
