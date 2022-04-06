@@ -20,17 +20,6 @@ Plug 'godlygeek/tabular'
 " Colorscheme & syntax
 Plug 'joshdick/onedark.vim'
 
-" Snippets are separated from the engine. Add this if you want them:
-Plug 'honza/vim-snippets'
-Plug 'SirVer/ultisnips'
-
-" C++ configuration
-Plug 'octol/vim-cpp-enhanced-highlight'
-Plug 'rhysd/vim-clang-format'
-
-" Rust configuration
-Plug 'rust-lang/rust.vim'
-
 call plug#end()            " required
 
 filetype plugin indent on    " required
