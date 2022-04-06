@@ -344,24 +344,28 @@
   (setq org-roam-graph-executable "neato")
   (setq org-roam-graph-extra-config
         '(("overlap" . "false")))
-  :config
+
   (setq org-roam-capture-templates
         '(("p" "private" plain "%?"
            :if-new
            (file+head "%<%Y%m%d>-${slug}.org"
-                      "#+TITLE: ${title}\n#+date: %t\n#+hugo_lastmod: %t\n#+filetags: private\n\n")
+                      "${title}\n#+date: %t\n#+hugo_lastmod: %t\n#+filetags: private\n\n")
            :unnarrowed t)
           ("d" "draft" plain "%?"
            :if-new
            (file+head "%<%Y%m%d>-${slug}.org"
-                      "#+TITLE: ${title}\n#+date: %t\n#+hugo_lastmod: %t\n#+filetags: draft\n\n")
+                      "${title}\n#+date: %t\n#+hugo_lastmod: %t\n#+filetags: draft\n\n")
            :unnarrowed t)
           ("r" "bibliography reference" plain
            "%?"
            :if-new
            (file+head "refs/${citekey}.org"
-                      "#+title: ${title}\n#+author: ${author-or-editor}\n#+year: ${year}\n#+hugo_lastmod: %t\n#+filetags: draft private")
+                      "${title}\n#+author: ${author-or-editor}\n#+year: ${year}\n#+hugo_lastmod: %t\n#+filetags: draft private")
            :unnarrowed t))))
+
+
+(map! :leader
+       :desc "Insert ORB note" "n r o" #'orb-insert-link)
 
 (use-package! websocket
   :after org-roam)
@@ -534,7 +538,7 @@
   :after org
   :config
   (setq org-ref-bibliography-notes (concat org-roam-directory "refs/")
-        org-ref-default-bibliography '((concat org-roam-directory "references.bib"))))
+        org-ref-default-bibliography (list (concat org-roam-directory "references.bib"))))
 
 (use-package! bibtex-completion
   :after org-ref
