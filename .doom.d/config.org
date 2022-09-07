@@ -14,13 +14,31 @@
 #+begin_src elisp
 (setq user-full-name "Victor Vialard"
       user-mail-address "vvialard@hotmail.fr")
+(setq auth-sources '("~/.authinfo"))
 #+end_src
 
 ** Theme
 
 #+begin_src elisp
 ;; Doom's theme
-(setq doom-theme 'doom-one)
+(setq current-theme 'doom-one-light)
+
+(defun synchronize-theme ()
+  (let* ((light-theme 'doom-one-light)
+         (dark-theme 'doom-one)
+         (start-time-light-theme 6)
+         (end-time-light-theme 18)
+         (hour (string-to-number (substring (current-time-string) 11 13)))
+         (next-theme (if (member hour (number-sequence start-time-light-theme end-time-light-theme))
+                         light-theme dark-theme)))
+    (when (not (equal doom-theme next-theme))
+      (setq doom-theme next-theme)
+      (load-theme next-theme))))
+
+(run-with-timer 0 900 'synchronize-theme)
+#+end_src
+
+#+begin_src elisp
 (setq display-line-numbers-type 'relative)
 
 ;; Random
@@ -70,6 +88,12 @@
 (map! :leader
       :desc "Insert Reference"
       "o C" #'=calendar)
+#+end_src
+
+** Git
+
+#+begin_src elisp
+(global-git-gutter-mode +1)
 #+end_src
 
 * Org-Mode
@@ -160,21 +184,53 @@
   (setq
    org-pomodoro-length 25
    org-pomodoro-short-break-length 5
-   org-pomodoro-long-break-length 20))
+   org-pomodoro-long-break-length 20
+   org-pomodoro-short-break-sound (concat "~/.doom.d/random/cat_meow.mp3")
+   org-pomodoro-long-break-sound (concat "~/.doom.d/random/cat_meow.mp3")
+   org-pomodoro-overtime-sound (concat "~/.doom.d/random/cat_meow.mp3")
+   org-pomodoro-finished-sound (concat "~/.doom.d/random/cat_meow.mp3")))
 
 (defun my/emacs-query-pomodoro ()
   "Return the remaining pomodoro time"
   (if (org-pomodoro-active-p)
       (cl-case org-pomodoro-state
         (:pomodoro
-         (format "Pomo: %d minutes - %s" (/ (org-pomodoro-remaining-seconds) 60) org-clock-heading))
+         (format "Pomo: %d min \n---\n%s" (/ (org-pomodoro-remaining-seconds) 60) org-clock-heading))
         (:short-break
-         (format "Short break time: %d minutes" (/ (org-pomodoro-remaining-seconds) 60)))
+         (format "Short break: %d min" (/ (org-pomodoro-remaining-seconds) 60)))
         (:long-break
-         (format "Long break time: %d minutes" (/ (org-pomodoro-remaining-seconds) 60)))
+         (format "Long break: %d min" (/ (org-pomodoro-remaining-seconds) 60)))
         (:overtime
-         (format "Overtime! %d minutes" (/ (org-pomodoro-remaining-seconds) 60))))
+         (format "Overtime! %d min" (/ (org-pomodoro-remaining-seconds) 60))))
     "No active pomo"))
+#+end_src
+
+#+begin_src elisp
+;; Needs terminal-notifier (brew install terminal-notifier)
+(defun notify-osx (title message)
+  (call-process "terminal-notifier"
+                nil 0 nil
+                "-group" "Emacs"
+                "-title" title
+                "-sender" "org.gnu.Emacs"
+                "-message" message))
+
+;; org-pomodoro mode hooks
+(add-hook 'org-pomodoro-finished-hook
+          (lambda ()
+          (notify-osx "Pomodoro completed!" "Time for a break.")))
+
+(add-hook 'org-pomodoro-break-finished-hook
+          (lambda ()
+          (notify-osx "Pomodoro Short Break Finished" "Ready for Another?")))
+
+(add-hook 'org-pomodoro-long-break-finished-hook
+          (lambda ()
+            (notify-osx "Pomodoro Long Break Finished" "Ready for Another?")))
+
+(add-hook 'org-pomodoro-killed-hook
+          (lambda ()
+          (notify-osx "Pomodoro Killed" "One does not simply kill a pomodoro!")))
 #+end_src
 
 ** Org-Clock
@@ -242,33 +298,33 @@
                             (:discard (:scheduled future))
                             (:name "Habits"
                              :habit t
-                             :order 9)
+                             :order 10)
                             (:discard (:habit t))
                             (:name "Waiting"
                              :todo "WAITING"
                              :order 25)
                             (:name "Immediatly"
                              :and (:priority "A" :todo "NEXT")
-                             :order 1)
+                             :order 2)
                             (:name "Next to do"
                              :todo "NEXT"
-                             :order 2)
+                             :order 3)
                             (:name "Due Today"
                              :deadline today
-                             :order 3)
+                             :order 4)
                             (:name "Important"
                              :tag "Important"
                              :priority "A"
-                             :order 4)
+                             :order 5)
                             (:name "Overdue"
                              :deadline past
-                             :order 5)
+                             :order 6)
                             (:name "Due Soon"
                              :deadline future
-                             :order 6)
+                             :order 7)
                             (:name "Less important"
                              :priority "B"
-                             :order 7)
+                             :order 8)
                             (:name "Trivial"
                              :tag "trivial"
                              :priority<= "C"
@@ -307,6 +363,7 @@
         org-journal-date-format "%A, %B %d %Y"
         org-journal-enable-agenda-integration t
         org-journal-file-header "#+TITLE: Weekly Journal\n#+SUBTITLE: Week %U, %B %Y\n#+STARTUP: folded\n\n")
+
   (defun org-journal-find-location ()
     (org-journal-new-entry t)
     (unless (eq org-journal-file-type 'daily)
@@ -319,7 +376,7 @@
 
   (add-to-list 'org-capture-templates
                `("j" "Journal entry" entry (function org-journal-find-location)
-                 "** %(format-time-string org-journal-time-format)%^{Title}\n%i%?"
+                 "** %^{Event status? |MEETING |TODO |NEXT |WAITING |DONE | }%(format-time-string org-journal-time-format)%^{Title}\n%i%?"
                  :jump-to-captured t :immediate-finish t))
   (add-to-list 'org-capture-templates
                `("d" "Daily journal" entry (function org-journal-find-location)
@@ -329,6 +386,9 @@
                `("w" "Weekly review" entry (function org-journal-find-location)
                  (file ,(expand-file-name (concat org-directory "weekly.org")))
                  :jump-to-captured t :immediate-finish t)))
+
+(map! :leader
+       :desc "Open current journal file" "n j o" #'org-journal-open-current-journal-file)
 #+end_src
 
 ** Roam
@@ -522,9 +582,6 @@
                            (add-hook 'before-save-hook 'time-stamp nil 'local)))
 #+end_src
 
-#+RESULTS:
-| (lambda nil (setq-local time-stamp-active t time-stamp-line-limit 18 time-stamp-start ^#\+hugo_lastmod: [ 	]* time-stamp-end $ time-stamp-format [%Y-%m-%d %a %H:%M:%S]) (add-hook 'before-save-hook 'time-stamp nil 'local)) | er/add-org-mode-expansions | org-ref-org-menu | (lambda nil (progn (set (make-local-variable 'time-stamp-active) t) (set (make-local-variable 'time-stamp-line-limit) 18) (set (make-local-variable 'time-stamp-start) ^#\+hugo_lastmod: [ 	]*) (set (make-local-variable 'time-stamp-end) $) (set (make-local-variable 'time-stamp-format) [%Y-%m-%d %a %H:%M:%S])) (add-hook 'before-save-hook 'time-stamp nil 'local)) | +lookup--init-org-mode-handlers-h | (closure ((hook . org-mode-hook) (--dolist-tail--) t) (&rest _) (add-hook 'before-save-hook 'org-encrypt-entries nil t)) | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes | doom-disable-show-paren-mode-h | doom-disable-show-trailing-whitespace-h | +org-enable-auto-reformat-tables-h | +org-enable-auto-update-cookies-h | +org-make-last-point-visible-h | org-fancy-priorities-mode | org-superstar-mode | evil-org-mode | toc-org-enable | org-cdlatex-mode | writegood-mode | flyspell-mode | embrace-org-mode-hook | org-eldoc-load | +literate-enable-recompile-h |
-
 ** Citations
 
 #+begin_src elisp
@@ -694,6 +751,12 @@
        :desc "Export OPML" "o" #'my/export-opml))
 #+end_src
 * Languages
+
+#+begin_src elisp
+(require 'yasnippet)
+(yas-global-mode 1)
+#+end_src
+
 ** Rust
 
 #+begin_src elisp
@@ -744,32 +807,22 @@
 ** Python
 
 #+begin_src elisp
-;; Python Environnements
+;; Python lsp
+(setq lsp-log-io t)
+(use-package lsp-pyright
+  :ensure t
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp))))  ; or lsp-deferred
 
-(use-package pyvenv
-  :config
-  (pyvenv-mode t)
-  (setenv "WORKON_HOME" "~/.pyenv/versions")
-
-  ;; Set correct Python interpreter
-  (setq pyvenv-post-activate-hooks
-        #'(lambda ()
-            (call-interactively #'lsp-workspace-restart)
-            (setq python-shell-interpreter (concat pyvenv-virtual-env "bin/python3"))))
-  (setq pyvenv-post-deactivate-hooks
-        (list (lambda ()
-                (setq python-shell-interpreter "python3")))))
-
-(use-package lsp-mode
-  :config
-  (setq lsp-pyls-plugins-flake8-enabled t)
-  (lsp-register-custom-settings
-   '(("pyls.plugins.pyls_mypy.enabled" t t)
-     ("pyls.plugins.pyls_mypy.live_mode" nil t)
-     ("pyls.plugins.pyls_black.enabled" t t)
-     ("pyls.plugins.pyls_isort.enabled" t t)))
-  :hook
-  ((python-mode . lsp)))
+;; Numpy doc
+(use-package numpydoc
+  :ensure t
+  :init
+  (setq numpydoc-insertion-style 'yas)
+  (map! :leader
+        :desc "Generate numpy doc"
+        "i d" #'numpydoc-generate))
 #+end_src
 
 ** Clang
@@ -802,3 +855,21 @@
   (load! "private-config.el"))
 #+end_src
 
+
+* Notes
+** Unison syncing
+
+[[https://www.cis.upenn.edu/~bcpierce/unison/][Unison]] is a two-way, platform agnostic tool that I use to sync my projects between my local machine and remote workers.
+
+#+begin_src bash :tangle no
+#!/bin/bash
+while :
+do
+        if unison default -testserver; then
+                unison default &&  :
+        else
+                echo "Could not connect to AWS"
+        fi
+	sleep 10
+done
+#+end_src
