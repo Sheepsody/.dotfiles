@@ -18,14 +18,17 @@ Plug 'sjl/gundo.vim'
 Plug 'godlygeek/tabular'
 
 " Colorscheme & syntax
-Plug 'joshdick/onedark.vim'
+Plug 'rakr/vim-one'
 
 call plug#end()            " required
 
 filetype plugin indent on    " required
 syntax on
 
-colorscheme onedark
+let g:airline_powerline_fonts = 1
+let g:airline_theme='one'
+colorscheme one
+set background=light
 
 " Leader
 let mapleader=" "
@@ -78,9 +81,6 @@ endif
 " Global clipboard
 set clipboard=unnamed
 
-let g:airline_powerline_fonts = 1
-let g:airline_theme='onedark'
-
 "" Bindings to switch between tabs
 map <C-j> :tabprevious<CR>
 nmap <C-j> :tabprevious<CR>
@@ -97,27 +97,12 @@ imap <C-k> <Esc>:tabnext<CR>i
 :  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
 :augroup END
 
-let g:ale_sign_error = '✘'
-let g:ale_sign_warning = '⚠'
-
 " Some servers have issues with backups
 set nobackup
 set nowritebackup
 
 " Better user experience
 set updatetime=300
-
-" Use <c-space> to trigger completion.
-inoremap <silent><expr> <c-space> coc#refresh()
-
-" Fugitive Conflict Resolution
-nnoremap <leader>gd :Gvdiff<CR>
-nnoremap gdh :diffget //2<CR>
-nnoremap gdl :diffget //3<CR>
-
-" Give more space for displaying messages.
-set cmdheight=2
-
 
 set conceallevel=2
 let g:vim_markdown_math = 1

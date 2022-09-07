@@ -7,6 +7,7 @@
 (package! prettier-js)
 (package! js2-mode)
 (package! rjsx-mode)
+(package! numpydoc)
 
 ;; Org Mode extensions
 
@@ -37,3 +38,4 @@
 (package! gitignore-mode
   :recipe (:host github :repo "magit/git-modes"
            :files ("gitignore-mode.el")))
+(package! git-gutter)
