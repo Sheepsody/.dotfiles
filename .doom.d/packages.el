@@ -19,13 +19,14 @@
   :recipe (:host github :repo "org-roam/org-roam-bibtex"))
 (package! org-clock-csv)
 (package! org-noter)
+(package! org-gcal)
 
 (package! elfeed-org)
-(package! elfeed-web)
+(package! elfeed-summary)
 
-(package! websocket)
-(package! org-roam-ui :recipe (:host github :repo "org-roam/org-roam-ui" :files ("*.el" "out")))
+(package! org-roam-ui)
 (package! org-download)
+(package! websocket)
 
 ;; MISC
 
@@ -39,3 +40,8 @@
   :recipe (:host github :repo "magit/git-modes"
            :files ("gitignore-mode.el")))
 (package! git-gutter)
+
+(package! dwim-shell-command)
+(package! map)
+(package! proced)
+(package! seq)
