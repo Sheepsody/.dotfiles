@@ -6,10 +6,7 @@
 ;; Contant file location depending on working station
 ;; See example in local.el.template and copy to modify it
 (load-file "~/.doom.d/local.el")
-(defun process-files (dir)
-  (mapc 'load-file
-        (directory-files dir t ".el$")))
-(process-files "~/.doom.d/modules/")
+(mapc 'load (file-expand-wildcards "~/.doom.d/modules/*.el"))
 #+end_src
 
 * General
@@ -46,7 +43,6 @@
 (setq display-line-numbers-type 'relative)
 
 ;; Random
-(load! "random-splash-image.el")
 (setq random-splash-image-dir (concat "~/.doom.d/splash-images"))
 (random-splash-image-set)
 #+end_src
@@ -156,6 +152,9 @@
   (setq org-archive-location (concat org-directory "archive.org::* FILE: %s"))
   (setq org-default-notes-file (concat org-directory "gtd/inbox.org"))
   (setq org-columns-default-format "%50ITEM(Task) %TODO %2PRIORITY %10Effort(Effort){:} %10CLOCKSUM %TAGS")
+
+  ;; Save org buggers periodically
+  (add-hook 'auto-save-hook 'org-save-all-org-buffers)
 
   ;; Inherit deadlines !
   (defun org-entry-properties-inherit-deadline (orig-fun &optional pom which)
