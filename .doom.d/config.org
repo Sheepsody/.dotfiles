@@ -6,6 +6,10 @@
 ;; Contant file location depending on working station
 ;; See example in local.el.template and copy to modify it
 (load-file "~/.doom.d/local.el")
+(defun process-files (dir)
+  (mapc 'load-file
+        (directory-files dir t ".el$")))
+(process-files "~/.doom.d/modules/")
 #+end_src
 
 * General
@@ -140,18 +144,31 @@
 (setq org-image-actual-width '(600))
 (custom-set-variables
  '(org-agenda-files (list
-                     (concat org-directory "inbox.org")
-                     (concat org-directory "habits.org")
-                     (concat org-directory "calendar.org")
-                     (concat org-directory "gtd.org"))))
+                     (concat org-directory "gtd/inbox.org")
+                     (concat org-directory "gtd/habits.org")
+                     (concat org-directory "gtd/calendar.org")
+                     (concat org-directory "gtd/gtd.org"))))
 
 (after! org
   :ensure t
   :config
   (setq org-id-extra-files (directory-files-recursively org-roam-directory "\.org$"))
   (setq org-archive-location (concat org-directory "archive.org::* FILE: %s"))
-  (setq org-default-notes-file (concat org-directory "inbox.org"))
+  (setq org-default-notes-file (concat org-directory "gtd/inbox.org"))
   (setq org-columns-default-format "%50ITEM(Task) %TODO %2PRIORITY %10Effort(Effort){:} %10CLOCKSUM %TAGS")
+
+  ;; Inherit deadlines !
+  (defun org-entry-properties-inherit-deadline (orig-fun &optional pom which)
+    "Call ORIG-FUN with POM, but if WHICH is `DEADLINE' do it recursively."
+    (if (string= which "SCHEDULED")
+        (org-with-point-at pom
+          (let (value)
+            (while (not (or (setq value (funcall orig-fun (point) which))
+                            (not (org-up-heading-safe)))))
+            value)
+          (funcall orig-fun pom which))))
+  (advice-add 'org-entry-properties :around #'org-entry-properties-inherit-deadline)
+
 
   ;; Open pdf in emacs
   (add-to-list 'org-file-apps '("\\.pdf\\'" . org-pdfview-open))
@@ -159,19 +176,16 @@
   ;; Capture templates
   (setq org-capture-templates
         `(
-         ("t" "Todo [inbox]" entry
-          (file ,(concat org-directory "inbox.org"))
-          "* TODO %i%?")
-         ("o" "One-Off [gtd]" entry
-          (file+headline ,(concat org-directory "gtd.org") "One-Off")
-          "* %^{Event status?|TODO|NEXT|WAITING|DONE } %i%?")
-         ("c" "Org-protocol capture" entry
-          (file ,(concat org-directory "inbox.org"))
-          "* %a\n/Entered on:/ %U\n"
-          :immediate-finish t)
-         ("e" "Event" entry
-          (file ,(concat org-directory "calendar.org"))
-          "* %^{Event status?||TODO|NEXT|MEETING}%^{Title}\nSCHEDULED: %^t\n%?")))
+          ("t" "Todo [inbox]" entry
+           (file ,(concat org-directory "gtd/inbox.org"))
+           "* TODO %i%?")
+          ("o" "One-Off [gtd]" entry
+           (file+headline ,(concat org-directory "gtd/gtd.org") "One-Off")
+           "* %^{Event status?|TODO|NEXT|WAITING|DONE } %i%?")
+          ("c" "Org-protocol capture" entry
+           (file ,(concat org-directory "gtd/inbox.org"))
+           "* %a\n/Entered on:/ %U\n"
+           :immediate-finish t)))
 
   ;; Keywords
   (setq org-todo-keywords
@@ -204,9 +218,41 @@
 ;; Stylesheet for HTML exports
 (setq org-html-head "<link rel=\"stylesheet\" href=\"https://rawgithub.com/edwardtufte/tufte-css/gh-pages/tufte.css\" type=\"text/css\" />")
 
+;; PlantUML
+(setq plantuml-default-exec-mode 'jar)
+
 ;; Org-Protocol
 (server-start)
 (require 'org-protocol)
+#+end_src
+
+#+begin_src elisp
+;; Source : https://macowners.club/posts/org-capture-from-everywhere-macos/
+;; Command : /usr/local/bin/emacsclient -ne "(timu-func-make-capture-frame)"
+(defun timu-func-make-capture-frame ()
+  "Create a new frame and run `org-capture'."
+  (interactive)
+  (make-frame '((name . "capture")
+                (top . 300)
+                (left . 700)
+                (width . 80)
+                (height . 25)))
+  (select-frame-by-name "capture")
+  (delete-other-windows)
+  (noflet ((switch-to-buffer-other-window (buf) (switch-to-buffer buf)))
+          (org-capture)))
+
+(defadvice org-capture-finalize
+    (after delete-capture-frame activate)
+  "Advise capture-finalize to close the frame."
+  (if (equal "capture" (frame-parameter nil 'name))
+      (delete-frame)))
+
+(defadvice org-capture-destroy
+    (after delete-capture-frame activate)
+  "Advise capture-destroy to close the frame."
+  (if (equal "capture" (frame-parameter nil 'name))
+      (delete-frame)))
 #+end_src
 
 ** Org-Pomodoro
@@ -221,10 +267,7 @@
    org-pomodoro-length 25
    org-pomodoro-short-break-length 5
    org-pomodoro-long-break-length 20
-   org-pomodoro-short-break-sound (concat "~/.doom.d/random/cat_meow.mp3")
-   org-pomodoro-long-break-sound (concat "~/.doom.d/random/cat_meow.mp3")
-   org-pomodoro-overtime-sound (concat "~/.doom.d/random/cat_meow.mp3")
-   org-pomodoro-finished-sound (concat "~/.doom.d/random/cat_meow.mp3")))
+   org-pomodoro-play-sounds nil))
 
 (defun my/emacs-query-pomodoro ()
   "Return the remaining pomodoro time"
@@ -243,13 +286,16 @@
 
 #+begin_src elisp
 ;; Needs terminal-notifier (brew install terminal-notifier)
-(defun notify-osx (title message)
-  (call-process "terminal-notifier"
-                nil 0 nil
-                "-group" "Emacs"
-                "-title" title
-                "-sender" "org.gnu.Emacs"
-                "-message" message))
+(defun notify-osx (title msg)
+  (let ((notifier-path (executable-find "terminal-notifier")))
+       (start-process
+           "OSX Alert"
+           "*OSX Alert*" ; use `nil` to not capture output; this captures output in background
+           notifier-path
+           "-message" msg
+           "-title" title
+           "-sender" "org.gnu.Emacs"
+           "-activate" "org.gnu.Emacs")))
 
 ;; org-pomodoro mode hooks
 (add-hook 'org-pomodoro-finished-hook
@@ -320,21 +366,14 @@
 
   (setq org-agenda-custom-commands
         '(("z" "Custom GTD view"
-           ((agenda "" ((org-agenda-span 'day)
-                        (org-agenda-overriding-header "")
-                        (org-super-agenda-groups
-                         '((:name "Today"
-                            :discard (:habit t)
-                            :time-grid t
-                            :date today
-                            :order 1)))))
-            (alltodo "" ((org-agenda-overriding-header "")
+           ((alltodo "" ((org-agenda-overriding-header "")
                          (org-super-agenda-groups
                           '(
                             (:discard (:scheduled future))
                             (:name "Habits"
                              :habit t
-                             :order 10)
+                             :tag "habit"
+                             :order 11)
                             (:discard (:habit t))
                             (:name "Waiting"
                              :todo "WAITING"
@@ -355,12 +394,18 @@
                             (:name "Overdue"
                              :deadline past
                              :order 6)
+                            (:name "Today"
+                             :scheduled today
+                             :order 7)
+                            (:name "Org Journal"
+                             :file-path "Journal/"
+                             :order 8)
                             (:name "Due Soon"
                              :deadline future
-                             :order 7)
+                             :order 9)
                             (:name "Less important"
                              :priority "B"
-                             :order 8)
+                             :order 10)
                             (:name "Trivial"
                              :tag "trivial"
                              :priority<= "C"
@@ -395,39 +440,55 @@
   (setq org-journal-dir (concat org-directory "Journal/")
         org-journal-file-type 'weekly
         org-journal-date-prefix "* "
-        org-journal-file-format "%Y-%m-%d.org"
+        org-journal-file-format "%Y-%W.org"
         org-journal-date-format "%A, %B %d %Y"
         org-journal-enable-agenda-integration t
-        org-journal-file-header "#+TITLE: Weekly Journal\n#+SUBTITLE: Week %U, %B %Y\n#+STARTUP: folded\n\n")
+        org-journal-file-header "#+TITLE: Weekly Journal\n#+SUBTITLE: Week %W, %B %Y\n#+STARTUP: folded\n\n")
 
-  (defun org-journal-find-location ()
-    (org-journal-new-entry t)
-    (unless (eq org-journal-file-type 'daily)
-      (org-narrow-to-subtree))
-    (goto-char (point-max)))
+  (setq org-journal-carryover-items
+        (string-join
+         '("TODO=\"TODO\""
+           "TODO=\"NEXT\""
+           "TODO=\"WAITING\""
+           "TODO=\"HOLD\"")
+         "|"))
+
+  (defvar org-journal--date-location-scheduled-time nil)
+
+  (defun org-journal-date-location (&optional scheduled-time)
+    (let ((scheduled-time (or scheduled-time (org-read-date nil nil nil "Date:"))))
+      (setq org-journal--date-location-scheduled-time scheduled-time)
+      (org-journal-new-entry t (org-time-string-to-time scheduled-time))
+      (unless (eq org-journal-file-type 'daily)
+        (org-narrow-to-subtree))
+      (goto-char (point-max))))
 
   (defun my/refile (file headline)
     (let ((pos (function org-journal-find-location)))
       (org-refile nil nil (list headline file nil pos))))
 
   (add-to-list 'org-capture-templates
-               `("j" "Journal entry" entry (function org-journal-find-location)
-                 "** %^{Event status? |MEETING |TODO |NEXT |WAITING |DONE | }%(format-time-string org-journal-time-format)%^{Title}\n%i%?"
-                 :jump-to-captured t :immediate-finish t))
+               `("j" "Journal entry" plain (function org-journal-date-location)
+                 "** TODO %?\n SCHEDULED: <%(princ org-journal--date-location-scheduled-time)>\n"
+                 :jump-to-captured t))
   (add-to-list 'org-capture-templates
-               `("d" "Daily journal" entry (function org-journal-find-location)
+               `("d" "Daily journal" plain (function org-journal-find-location)
                  (file ,(expand-file-name (concat org-directory "methodology/daily.org")))
                  :jump-to-captured t :immediate-finish t))
   (add-to-list 'org-capture-templates
-               `("w" "Weekly review" entry (function org-journal-find-location)
-                 (file ,(expand-file-name (concat org-directory "weekly.org")))
-                 :jump-to-captured t :immediate-finish t)))
+               `("w" "Weekly review" plain (function org-journal-find-location)
+                 (file ,(expand-file-name (concat org-directory "methodology/weekly.org")))
+                 :jump-to-captured t :immediate-finish t))
 
-(map! :leader
-       :desc "Open current journal file" "n j o" #'org-journal-open-current-journal-file)
+  ;; My custom bindings
+  (map! :leader
+        (:prefix ("n j" . "Journal")
+         :desc "New journal entry" "j" #'org-journal-new-entry
+         :desc "New journal entry" "o" #'org-journal-open-current-journal-file
+         :desc "Search journal entry" "s" #'org-journal-search)))
 #+end_src
 
-** Roam
+** Org-Roam
 
 #+begin_src elisp
 ;; Org Roam
@@ -469,14 +530,21 @@
 (use-package! org-roam-ui
   :after org-roam
   :config
-  (setq org-roam-ui-sync-theme t
-        org-roam-ui-follow nil
+  (setq org-roam-ui-follow 'nil
+        org-roam-dailies-directory "daily/"
         org-roam-ui-update-on-save t
         org-roam-ui-open-on-start t))
 
+;; Org roam buffer
+(add-to-list 'display-buffer-alist
+             '("\\*org-roam\\*"
+               (display-buffer-in-direction)
+               (direction . right)
+               (window-width . 0.33)
+               (window-height . fit-window-to-buffer)))
+
 ;; Deft Configuration
 ;; Used for quick browsing of plain text notes
-
 (use-package deft
   :after org
   :config
@@ -784,6 +852,7 @@
 (map! :leader
       (:prefix-map ("e" . "elfeed")
        :desc "ElFeed" "e" #'elfeed
+       :desc "Summary" "s" #'elfeed-summary
        :desc "Export OPML" "o" #'my/export-opml))
 #+end_src
 * Languages
@@ -880,6 +949,55 @@
 #+RESULTS:
 
 * Other
+** Kill process
+
+#+begin_src elisp
+;; Found on hacker news
+;; Source: https://xenodium.com/emacs-quick-kill-process/
+(defun dwim-shell-commands-kill-process ()
+  "Select and kill process."
+  (interactive)
+  (let* ((pid-width 5)
+         (comm-width 25)
+         (user-width 10)
+         (processes (proced-process-attributes))
+         (candidates
+          (mapcar (lambda (attributes)
+                    (let* ((process (cdr attributes))
+                           (pid (format (format "%%%ds" pid-width) (map-elt process 'pid)))
+                           (user (format (format "%%-%ds" user-width)
+                                         (truncate-string-to-width
+                                          (map-elt process 'user) user-width nil nil t)))
+                           (comm (format (format "%%-%ds" comm-width)
+                                         (truncate-string-to-width
+                                          (map-elt process 'comm) comm-width nil nil t)))
+                           (args-width (- (window-width) (+ pid-width user-width comm-width 3)))
+                           (args (map-elt process 'args)))
+                      (cons (if args
+                                (format "%s %s %s %s" pid user comm (truncate-string-to-width args args-width nil nil t))
+                              (format "%s %s %s" pid user comm))
+                            process)))
+                  processes))
+         (selection (map-elt candidates
+                             (completing-read "kill process: "
+                                              (seq-sort
+                                               (lambda (p1 p2)
+                                                 (string-lessp (nth 2 (split-string (string-trim (car p1))))
+                                                               (nth 2 (split-string (string-trim (car p2))))))
+                                               candidates) nil t)))
+         (prompt-title (format "%s %s %s"
+                               (map-elt selection 'pid)
+                               (map-elt selection 'user)
+                               (map-elt selection 'comm))))
+    (when (y-or-n-p (format "Kill? %s" prompt-title))
+      (dwim-shell-command-on-marked-files
+       (format "Kill %s" prompt-title)
+       (format "kill -9 %d" (map-elt selection 'pid))
+       :utils "kill"
+       :error-autofocus t
+       :silent-success t))))
+#+end_src
+
 ** Shell
 
 #+begin_src elisp
@@ -895,7 +1013,6 @@
   (load! "private-config.el"))
 #+end_src
 
-* Notes
 ** Unison syncing
 
 [[https://www.cis.upenn.edu/~bcpierce/unison/][Unison]] is a two-way, platform agnostic tool that I use to sync my projects between my local machine and remote workers.
@@ -909,6 +1026,13 @@ do
         else
                 echo "Could not connect to AWS"
         fi
-	sleep 10
+    sleep 10
 done
+#+end_src
+
+** Tridactyl (Vim-like firefox)
+
+#+begin_src conf :tangle ~/.tridactylrc
+set searchurls.julia https://www.google.com/search?q=site:http://docs.julialang.org/en/v1%20
+set searchurls.so https://stackoverflow.com/search?q=
 #+end_src
