@@ -1035,3 +1035,13 @@ done
 set searchurls.julia https://www.google.com/search?q=site:http://docs.julialang.org/en/v1%20
 set searchurls.so https://stackoverflow.com/search?q=
 #+end_src
+
+** EmacsClient launcher (automator)
+
+#+begin_src bash :tangle no
+/opt/homebrew/bin/emacsclient --no-wait -c -a emacs -d localhost:0 "$@" >/dev/null 2>&1 &
+#+end_src
+
+#+DOWNLOADED: screenshot @ 2023-02-02 10:08:16
+[[file:../../../Library/CloudStorage/Dropbox/emacs/Roam/images/org-download/Other/20230202-100816_screenshot.png]]
+#+CAPTION: Automator setting for emacsclient launcher
