@@ -5,7 +5,6 @@
 #+begin_src elisp
 ;; Contant file location depending on working station
 ;; See example in local.el.template and copy to modify it
-(load-file "~/.doom.d/local.el")
 (mapc 'load (file-expand-wildcards "~/.doom.d/modules/*.el"))
 #+end_src
 
@@ -17,6 +16,18 @@
       user-mail-address "vvialard@hotmail.fr")
 (setq auth-sources '("~/.authinfo"))
 #+end_src
+
+** Constants
+
+#+begin_src elisp
+(setq org-directory (expand-file-name "~/Dropbox/emacs/Org/")
+      org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/")
+      elfeed-db-directory (expand-file-name "~/Dropbox/emacs/.elfeed/")
+      rmh-elfeed-org-files (list (expand-file-name "~/Dropbox/emacs/Org/elfeed/elfeed.org")))
+#+end_src
+
+#+RESULTS:
+| /Users/sheepsody/Dropbox/emacs/Org/elfeed/elfeed.org |
 
 ** Theme
 
