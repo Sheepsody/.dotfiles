@@ -3,8 +3,6 @@
 #+STARTUP: fold
 
 #+begin_src elisp
-;; Contant file location depending on working station
-;; See example in local.el.template and copy to modify it
 (mapc 'load (file-expand-wildcards "~/.doom.d/modules/*.el"))
 #+end_src
 
@@ -20,14 +18,13 @@
 ** Constants
 
 #+begin_src elisp
-(setq org-directory (expand-file-name "~/Dropbox/emacs/Org/")
-      org-roam-directory (expand-file-name "~/Dropbox/emacs/Roam/")
-      elfeed-db-directory (expand-file-name "~/Dropbox/emacs/.elfeed/")
-      rmh-elfeed-org-files (list (expand-file-name "~/Dropbox/emacs/Org/elfeed/elfeed.org")))
+(let ((default-directory "~/Library/Mobile Documents/com~apple~CloudDocs/Emacs/"))
+  (setq org-directory (expand-file-name "emacs/Org/")
+        org-roam-directory (expand-file-name "emacs/Roam/")
+        elfeed-db-directory (expand-file-name "emacs/.elfeed/")
+        rmh-elfeed-org-files (list (expand-file-name "emacs/Org/elfeed/elfeed.org"))))
 #+end_src
 
-#+RESULTS:
-| /Users/sheepsody/Dropbox/emacs/Org/elfeed/elfeed.org |
 
 ** Theme
 
@@ -97,8 +94,12 @@
       "i c" #'org-ref-helm-insert-cite-link)
 
 (map! :leader
-      :desc "Insert Reference"
+      :desc "Open Calendar"
       "o C" #'=calendar)
+
+(map! :leader
+      :desc "List bookmarks"
+      "b L" #'list-bookmarks)
 #+end_src
 
 ** Git
@@ -508,7 +509,8 @@
 (use-package! org-roam
   :ensure t
   :config
-  (setq org-roam-graph-executable "neato")
+  (setq org-roam-graph-executable "dot"
+        org-roam-graph-filetype "dot")
   (setq org-roam-graph-extra-config
         '(("overlap" . "false")))
 
@@ -866,6 +868,20 @@
        :desc "Summary" "s" #'elfeed-summary
        :desc "Export OPML" "o" #'my/export-opml))
 #+end_src
+** Bookmarks
+
+Add Bookmark from URL
+
+#+begin_src elisp
+(defun your-bookmark-set-url (url)
+  (interactive "sBookmark URL: ")
+  (if (assoc url bookmark-alist)
+      (user-error "%s is already bookmarked" url)
+    (push `(,url . ((handler . ,(lambda (bookmark)
+                                  (browse-url (car bookmark))))))
+          bookmark-alist)))
+#+end_src
+
 * Languages
 
 #+begin_src elisp
@@ -943,6 +959,13 @@
   (map! :leader
         :desc "Generate numpy doc"
         "i d" #'numpydoc-generate))
+
+;; Conda
+(use-package conda
+  :ensure t
+  :init
+  (setq conda-anaconda-home (expand-file-name "/opt/homebrew/anaconda3/"))
+  (setq conda-env-home-directory (expand-file-name "/opt/homebrew/anaconda3/")))
 #+end_src
 
 ** Clang
@@ -1041,11 +1064,46 @@ do
 done
 #+end_src
 
+Example of unison config to use.
+
+#+begin_src txt :tangle no
+# Root files to sync
+root = /Users/sheepsody/GitHub/
+root = ssh://CS162//home/ubuntu/github/
+
+# Paths to sync
+path = cs162-homeworks
+path = cs162-projects
+
+# Continue watching for changes on both sides
+repeat = watch
+
+# batch mode: ask no questions at all
+batch = true
+
+# Some regexps specifying names and paths to ignore
+ignore = Name */@eaDir
+ignore = Name */_notes
+ignore = Name .DS_Store
+ignore = Name SyncToy_*.dat
+ignore = Path */Archives
+ignore = Path */tools
+ignore = Name *.sublime*
+ignore = Name {*/,.*/}.git
+
+# Config
+log = true
+times = true
+auto = true
+#+end_src
+
 ** Tridactyl (Vim-like firefox)
 
 #+begin_src conf :tangle ~/.tridactylrc
 set searchurls.julia https://www.google.com/search?q=site:http://docs.julialang.org/en/v1%20
 set searchurls.so https://stackoverflow.com/search?q=
+set searchurls.w https://fr.wikipedia.org/w/index.php?search=
+set searchurls.wo https://mathworld.wolfram.com/search/?query=
 #+end_src
 
 ** EmacsClient launcher (automator)
@@ -1053,7 +1111,3 @@ set searchurls.so https://stackoverflow.com/search?q=
 #+begin_src bash :tangle no
 /opt/homebrew/bin/emacsclient --no-wait -c -a emacs -d localhost:0 "$@" >/dev/null 2>&1 &
 #+end_src
-
-#+DOWNLOADED: screenshot @ 2023-02-02 10:08:16
-[[file:../../../Library/CloudStorage/Dropbox/emacs/Roam/images/org-download/Other/20230202-100816_screenshot.png]]
-#+CAPTION: Automator setting for emacsclient launcher

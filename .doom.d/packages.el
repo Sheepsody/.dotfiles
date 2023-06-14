@@ -24,9 +24,11 @@
 (package! elfeed-org)
 (package! elfeed-summary)
 
-(package! org-roam-ui)
 (package! org-download)
 (package! websocket)
+
+(unpin! org-roam)
+(package! org-roam-ui)
 
 ;; MISC
 
@@ -45,3 +47,5 @@
 (package! map)
 (package! proced)
 (package! seq)
+
+(package! exec-path-from-shell)
