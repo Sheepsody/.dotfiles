@@ -1,5 +1,5 @@
 # If you come from bash you might have to change your $PATH.
-export PATH=$HOME/bin:/usr/local/bin:$PATH
+export PATH=$HOME/bin:/usr/local/bin:/opt/homebrew/bin/:$PATH
 
 # Theme
 ZSH_THEME="robbyrussell"
@@ -33,6 +33,10 @@ plugins=(
 
 # Loading fzf completion
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+export FZF_DEFAULT_OPTS=" \
+    --color=bg+:#ccd0da,bg:#eff1f5,spinner:#dc8a78,hl:#d20f39 \
+    --color=fg:#4c4f69,header:#d20f39,info:#8839ef,pointer:#dc8a78 \
+    --color=marker:#dc8a78,fg+:#4c4f69,prompt:#8839ef,hl+:#d20f39"
 
 # Emacs
 export EHSELL=/bin/zsh
@@ -85,3 +89,6 @@ unset __conda_setup
 # <<< conda initialize <<<
 
 autoload -Uz compinit && compinit
+
+# Rust
+export PATH=$PATH:$HOME/.cargo/bin

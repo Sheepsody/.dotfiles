@@ -14,11 +14,8 @@ Plug 'tpope/vim-fugitive'
 Plug 'vim-airline/vim-airline'
 Plug 'sjl/gundo.vim'
 
-" Markdown syntax, matching and mapping
-Plug 'godlygeek/tabular'
-
 " Colorscheme & syntax
-Plug 'rakr/vim-one'
+Plug 'catppuccin/vim', { 'as': 'catppuccin'  }
 
 call plug#end()            " required
 
@@ -26,9 +23,12 @@ filetype plugin indent on    " required
 syntax on
 
 let g:airline_powerline_fonts = 1
-let g:airline_theme='one'
-colorscheme one
-set background=light
+
+colorscheme catppuccin_latte
+let g:lightline = {'colorscheme': 'catppuccin_latte'}
+let g:airline_theme = 'catppuccin_latte'
+set termguicolors
+set noshowmode
 
 " Leader
 let mapleader=" "
@@ -90,7 +90,6 @@ nmap <C-k> :tabnext<CR>
 imap <C-k> <Esc>:tabnext<CR>i
 
 " Setting line number
-
 :augroup numbertoggle
 :  autocmd!
 :  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
@@ -103,12 +102,5 @@ set nowritebackup
 
 " Better user experience
 set updatetime=300
-
 set conceallevel=2
-let g:vim_markdown_math = 1
-let g:vim_markdown_frontmatter = 1
-let g:vim_markdown_toml_frontmatter = 1
-let g:vim_markdown_json_frontmatter = 1
-let g:vim_markdown_strikethrough = 1
-let g:vim_markdown_new_list_item_indent = 2
 

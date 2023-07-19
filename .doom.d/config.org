@@ -6,6 +6,7 @@
 (mapc 'load (file-expand-wildcards "~/.doom.d/modules/*.el"))
 #+end_src
 
+
 * General
 ** Personal Informations
 
@@ -18,20 +19,32 @@
 ** Constants
 
 #+begin_src elisp
-(let ((default-directory "~/Library/Mobile Documents/com~apple~CloudDocs/Emacs/"))
+(if (eq system-type 'darwin)
+    (setq emacs-cloud-root "/Users/sheepsody/Library/Mobile Documents/com~apple~CloudDocs/Emacs/")
+  (setq emacs-cloud-root "/data/"))
+
+(let ((default-directory emacs-cloud-root))
   (setq org-directory (expand-file-name "emacs/Org/")
         org-roam-directory (expand-file-name "emacs/Roam/")
         elfeed-db-directory (expand-file-name "emacs/.elfeed/")
         rmh-elfeed-org-files (list (expand-file-name "emacs/Org/elfeed/elfeed.org"))))
 #+end_src
 
-
 ** Theme
 
 #+begin_src elisp
 ;; Doom's theme
-(setq current-theme 'doom-one-light)
+(load-theme 'catppuccin :no-confirm)
+(setq doom-theme 'catppuccin)
+(setq catppuccin-flavor 'latte) ;; or 'frappe, 'latte, 'macchiato, or 'mocha
+(setq display-line-numbers 'relative)
+(catppuccin-reload)
+#+end_src
 
+*** Switch dark/light version
+
+#+begin_src elisp :tangle no
+;; Synchronize between light and dark version
 (defun synchronize-theme ()
   (let* ((light-theme 'doom-one-light)
          (dark-theme 'doom-one)
@@ -43,13 +56,13 @@
     (when (not (equal doom-theme next-theme))
       (setq doom-theme next-theme)
       (load-theme next-theme))))
-
-(run-with-timer 0 900 'synchronize-theme)
+;; Disabled
+;;(run-with-timer 0 900 'synchronize-theme)
 #+end_src
 
-#+begin_src elisp
-(setq display-line-numbers-type 'relative)
+*** Random splash image
 
+#+begin_src elisp
 ;; Random
 (setq random-splash-image-dir (concat "~/.doom.d/splash-images"))
 (random-splash-image-set)
@@ -144,6 +157,13 @@
       :desc "dap breakpoint log message" "l" #'dap-breakpoint-log-message)
 #+end_src
 
+** Path
+
+#+begin_src elisp
+(setenv "PATH" (concat ".:/opt/homebrew/bin/" (getenv "PATH")))
+(setq exec-path (append exec-path '(".:/opt/homebrew/bin/")))
+#+end_src
+
 * Org-Mode
 ** Org
 
@@ -180,6 +200,8 @@
           (funcall orig-fun pom which))))
   (advice-add 'org-entry-properties :around #'org-entry-properties-inherit-deadline)
 
+  ;; Reduce size of latex fragments
+  (plist-put org-format-latex-options :scale 0.7)
 
   ;; Open pdf in emacs
   (add-to-list 'org-file-apps '("\\.pdf\\'" . org-pdfview-open))
@@ -202,14 +224,18 @@
   (setq org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "MEETING(m)" "WAITING(w)" "HOLD(h)" "|" "DONE(d)" "CANCELLED(c)")))
   (setq org-todo-keyword-faces
-        '(("TODO"      :foreground "#46D9FF") ;; brightblue
-          ("NEXT"      :foreground "#da8548") ;; brightred
-          ("MEETING"   :foreground "#ECBE7B") ;; yellow
-          ("WAITING"   :foreground "#c678dd") ;; brightmagenta
-          ("HOLD"      :foreground "#a9a1e1") ;; magenta
-          ("DONE"      :foreground "#98be65") ;; brightgreen
-          ("CANCELLED" :foreground "#73797e") ;; gray
+        '(("TODO"      :foreground "#04a5e5") ;; Sky
+          ("NEXT"      :foreground "#fe640b") ;; Peach
+          ("MEETING"   :foreground "#ea76cb") ;; Pink
+          ("WAITING"   :foreground "#7287fd") ;; Lavender
+          ("HOLD"      :foreground "#5c5f77") ;; Subtext
+          ("DONE"      :foreground "#40a02b") ;; Green
+          ("CANCELLED" :foreground "#5c5f77") ;; Subtext
           )))
+
+(setq org-fancy-priorities-list '((?A . "❗")
+                                  (?B . "⚡")
+                                  (?C . "☕")))
 
 (defun my-org-summarize-task-status ()
   "Count number of tasks by status.
@@ -239,7 +265,7 @@
 
 #+begin_src elisp
 ;; Source : https://macowners.club/posts/org-capture-from-everywhere-macos/
-;; Command : /usr/local/bin/emacsclient -ne "(timu-func-make-capture-frame)"
+;; Command : /opt/homebrew/bin/emacsclient -ne "(timu-func-make-capture-frame)"
 (defun timu-func-make-capture-frame ()
   "Create a new frame and run `org-capture'."
   (interactive)
@@ -266,6 +292,12 @@
       (delete-frame)))
 #+end_src
 
+#+begin_src bash :tangle no
+# To toggle latex fragments, I had to run the following commands after installing MacTex
+sudo ln -s /Library/TeX/texbin/latex /usr/local/bin/
+sudo ln -s /Library/TeX/texbin/dvipng /usr/local/bin/
+#+end_src
+
 ** Org-Pomodoro
 
 #+begin_src elisp
@@ -287,12 +319,12 @@
         (:pomodoro
          (format "Pomo: %d min \n---\n%s" (/ (org-pomodoro-remaining-seconds) 60) org-clock-heading))
         (:short-break
-         (format "Short break: %d min" (/ (org-pomodoro-remaining-seconds) 60)))
+         (format "Break: %d min" (/ (org-pomodoro-remaining-seconds) 60)))
         (:long-break
-         (format "Long break: %d min" (/ (org-pomodoro-remaining-seconds) 60)))
+         (format "Break: %d min" (/ (org-pomodoro-remaining-seconds) 60)))
         (:overtime
-         (format "Overtime! %d min" (/ (org-pomodoro-remaining-seconds) 60))))
-    "No active pomo"))
+         (format "Over! %d min" (/ (org-pomodoro-remaining-seconds) 60))))
+    "No pomo"))
 #+end_src
 
 #+begin_src elisp
@@ -305,8 +337,7 @@
            notifier-path
            "-message" msg
            "-title" title
-           "-sender" "org.gnu.Emacs"
-           "-activate" "org.gnu.Emacs")))
+           "-sender" "com.apple.automator.EmacsClient")))
 
 ;; org-pomodoro mode hooks
 (add-hook 'org-pomodoro-finished-hook
@@ -325,6 +356,9 @@
           (lambda ()
           (notify-osx "Pomodoro Killed" "One does not simply kill a pomodoro!")))
 #+end_src
+
+#+RESULTS:
+| lambda | nil | (notify-osx Pomodoro Killed One does not simply kill a pomodoro!) |
 
 ** Org-Clock
 
@@ -364,6 +398,9 @@
 (use-package! org-super-agenda
   :commands (org-super-agenda-mode))
 
+(add-hook 'org-super-agenda-mode-hook (lambda () (setq display-line-numbers 'relative)))
+(add-hook 'org-agenda-mode-hook (lambda () (setq display-line-numbers 'relative)))
+
 (after! org-agenda
   :init
   (setq org-agenda-skip-scheduled-if-done t
@@ -377,7 +414,16 @@
 
   (setq org-agenda-custom-commands
         '(("z" "Custom GTD view"
-           ((alltodo "" ((org-agenda-overriding-header "")
+           (
+            (agenda "" ((org-agenda-overriding-header "")
+                        (org-super-agenda-groups
+                         '(
+                           (:discard (:habit t :tag "habit"))
+                           (:name "Today"
+                            :time-grid t
+                            :scheduled today
+                            :order 1)))))
+            (alltodo "" ((org-agenda-overriding-header "")
                          (org-super-agenda-groups
                           '(
                             (:discard (:scheduled future))
@@ -405,9 +451,6 @@
                             (:name "Overdue"
                              :deadline past
                              :order 6)
-                            (:name "Today"
-                             :scheduled today
-                             :order 7)
                             (:name "Org Journal"
                              :file-path "Journal/"
                              :order 8)
@@ -506,13 +549,26 @@
 
 (setq org-roam-notes-path org-roam-directory)
 
+(defun my-copy-file (source)
+  "Copy a file from SOURCE to DESTINATION."
+  (interactive "fCopy file: \nFDestination: ")
+  (copy-file source "~/test1.dot"))
+
 (use-package! org-roam
   :ensure t
   :config
   (setq org-roam-graph-executable "dot"
-        org-roam-graph-filetype "dot")
+        org-roam-graph-filetype "dot"
+        org-roam-graph-viewer 'my-copy-file)
+
   (setq org-roam-graph-extra-config
         '(("overlap" . "false")))
+
+  (setq org-roam-mode-sections
+      (list #'org-roam-backlinks-section
+            #'org-roam-reflinks-section
+            #'org-roam-unlinked-references-section
+            ))
 
   (setq org-roam-capture-templates
         '(("p" "private" plain "%?"
@@ -535,18 +591,6 @@
 
 (map! :leader
        :desc "Insert ORB note" "n r o" #'orb-insert-link)
-
-(use-package! websocket
-  :after org-roam)
-
-(use-package! org-roam-ui
-  :after org-roam
-  :config
-  (setq org-roam-ui-follow 'nil
-        org-roam-ui-sync-theme 'nil
-        org-roam-dailies-directory "daily/"
-        org-roam-ui-update-on-save t
-        org-roam-ui-open-on-start t))
 
 ;; Org roam buffer
 (add-to-list 'display-buffer-alist
@@ -580,7 +624,7 @@
   :after org-roam
   :config
   (setq org-hugo-date-format "%Y-%m-%d")
-  (setq org-hugo-base-dir "~/GitHub/MySecondBrainWebsite")
+  (setq org-hugo-base-dir "~/GitHub/sheepsody.github.io/")
   :init
   ;; These functions need to be in :init otherwise they will not be
   ;; callable in an emacs --batch context which for some reason
@@ -607,11 +651,15 @@
       (format
        ;; The percentage sign needs to be escaped twice because there
        ;; is two format calls—once here and the other by emacsql
-       "SELECT id FROM (SELECT links.source AS id, group_concat(tags.tag) AS alltags FROM links LEFT OUTER JOIN tags ON links.source = tags.node_id WHERE links.type = '\"id\"' AND links.dest = '\"%s\"' GROUP BY links.source) Q  WHERE alltags IS NULL OR (','||alltags||',' NOT LIKE '%%%%,\"private\",%%%%' AND ','||alltags||',' NOT LIKE '%%%%,\"draft\",%%%%') "
+       ;; Add to filter private notes
+       ;; WHERE alltags IS NULL OR (','||alltags||',' NOT LIKE '%%%%,\"private\",%%%%' AND ','||alltags||',' NOT LIKE '%%%%,\"draft\",%%%%')
+       "SELECT id FROM (SELECT links.source AS id, group_concat(tags.tag) AS alltags FROM links LEFT OUTER JOIN tags ON links.source = tags.node_id WHERE links.type = '\"id\"' AND links.dest = '\"%s\"' GROUP BY links.source) Q"
        id))))
 
   (defun file-path-to-md-file-name (path)
     (let ((file-name (first (last (split-string path "/")))))
+      (when (string-match "/refs/" path)
+        (setq file-name (concat "ref_" file-name)))
       (concat (first (split-string file-name "\\.")) ".md")))
 
   (defun file-path-to-slug (path)
@@ -631,7 +679,9 @@
     ;; draft. The way we filter tags doesn't work nicely
     ;; with emacsql's DSL so just use a raw SQL query
     ;; for clarity
-    (let ((notes (org-roam-db-query "SELECT id, file FROM (SELECT nodes.id, nodes.file, group_concat(tags.tag) AS alltags FROM nodes LEFT OUTER JOIN tags ON nodes.id = tags.node_id GROUP BY nodes.file)  WHERE alltags is null or (','||alltags||',' not like '%%,\"private\",%%' and ','||alltags||',' not like '%%,\"draft\",%%') ")))
+    ;; Add to end of query to remove private and draft notes
+    ;; WHERE alltags is null or (','||alltags||',' not like '%%,\"private\",%%' and ','||alltags||',' not like '%%,\"draft\",%%')
+    (let ((notes (org-roam-db-query "SELECT id, file FROM (SELECT nodes.id, nodes.file, group_concat(tags.tag) AS alltags FROM nodes LEFT OUTER JOIN tags ON nodes.id = tags.node_id GROUP BY nodes.file)")))
       (-map
        (-lambda ((id file))
          ;; Use temporary buffer to prevent a buffer being opened for
@@ -662,7 +712,7 @@
                     (file-path-to-md-file-name file)))
 
 
-            (message (file-path-to-md-file-name file))
+           (message (file-path-to-md-file-name file))
 
            ;; If this is a placeholder note (no content in the
            ;; body) then add default text. This makes it look ok when
@@ -889,11 +939,39 @@ Add Bookmark from URL
 (yas-global-mode 1)
 #+end_src
 
+** LSP Config
+
+#+begin_src elisp
+;; LSP performance tuning
+;; https://emacs-lsp.github.io/lsp-mode/page/performance/
+(setq gc-cons-threshold (* 100 1024 1024)
+      read-process-output-max (* 1024 1024)
+      treemacs-space-between-root-nodes nil
+      company-idle-delay 0.0
+      company-minimum-prefix-length 1
+      lsp-idle-delay 0.5)
+
+(with-eval-after-load 'lsp-mode
+  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+  (require 'dap-cpptools)
+  (yas-global-mode))
+#+end_src
+
 ** Rust
 
 #+begin_src elisp
 ;; Rust configutation
 (setq rustic-lsp-server 'rust-analyzer)
+(setq lsp-rust-analyzer-store-path "/Users/Sheepsody/.cargo/bin/rust-analyzer")
+
+(after! dap-mode
+  (dap-register-debug-template "Rust::GDB Run Configuration"
+                             (list :type "gdb"
+                                   :request "launch"
+                                   :name "GDB::Run"
+                           :gdbpath "rust-gdb"
+                                   :target nil
+                                   :cwd nil)))
 #+end_src
 
 ** TypeScript, JavaScript & CSS
@@ -908,20 +986,10 @@ Add Bookmark from URL
                            "--single-quote" "true"
                            "--print-width" "120"
                            "--tab-width" "4"
-                           "--use-tabs" "false"
+                           "--use-tabs" "false  "
                            "--jsx-bracket-same-line" "false"
                            "--stylelint-integration" "true"
                            )))
-
-(use-package js2-mode)
-
-(use-package rjsx-mode
-  :mode(("\\.js\\'" . rjsx-mode)
-        ("\\.jsx\\'" . rjsx-mode))
-  :init
-  (add-hook 'rjsx-mode-hook 'prettier-js-mode)
-  (add-hook 'rjsx-mode-hook 'tide-mode))
-
 (use-package tide
   :mode(("\\.ts\\'" . typescript-mode))
   :init
@@ -940,7 +1008,6 @@ Add Bookmark from URL
 
 #+begin_src elisp
 ;; Python lsp
-(setq lsp-log-io t)
 (use-package lsp-pyright
   :ensure t
   :hook (python-mode . (lambda ()
@@ -1047,6 +1114,47 @@ Add Bookmark from URL
   (load! "private-config.el"))
 #+end_src
 
+** EmacsClient launcher (automator)
+
+#+begin_src bash :tangle no
+# Shell script
+/opt/homebrew/bin/emacsclient --no-wait -c -a emacs -d localhost:0 "$@" >/dev/null 2>&1 &
+
+# AppleScript
+#on run
+#	tell application "Emacs" to activate
+#end run
+#+end_src
+** Tmux
+
+I use the following package : [[https://github.com/gpakosz/.tmux][Oh my tmux!]]
+
+** Org Protocol
+
++ See [[https://www.orgroam.com/manual.html#Mac-OS][Org-Roam doc]]
+
+** Install emacs
+
+#+begin_src bash :tangle no
+# Installing doom dependencies
+# required dependencies
+brew install git ripgrep
+# optional dependencies
+brew install coreutils fd
+# Installs clang
+xcode-select --install
+
+# Installing emacs
+brew tap d12frosted/emacs-plus
+brew install emacs-plus
+ln -s /usr/local/opt/emacs-plus/Emacs.app /Applications/Emacs.app
+
+# Install doom
+git clone https://github.com/hlissner/doom-emacs ~/.emacs.d
+~/.emacs.d/bin/doom install
+#+end_src
+
+* Tools
 ** Unison syncing
 
 [[https://www.cis.upenn.edu/~bcpierce/unison/][Unison]] is a two-way, platform agnostic tool that I use to sync my projects between my local machine and remote workers.
@@ -1106,8 +1214,17 @@ set searchurls.w https://fr.wikipedia.org/w/index.php?search=
 set searchurls.wo https://mathworld.wolfram.com/search/?query=
 #+end_src
 
-** EmacsClient launcher (automator)
+** Git
 
-#+begin_src bash :tangle no
-/opt/homebrew/bin/emacsclient --no-wait -c -a emacs -d localhost:0 "$@" >/dev/null 2>&1 &
+#+begin_src conf :tangle ~/.gitconfig
+[alias]
+	lg1 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+	lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+	lg = !"git lg1"
+
+[merge]
+    conflictstyle = diff3
+[user]
+	name = Victor Vialard
+	email = vvialard@hotmail.fr
 #+end_src

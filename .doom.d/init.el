@@ -141,7 +141,7 @@
        (java
         +meghanada
         +lsp) ; the poster child for carpal tunnel syndrome
-       (javascript +lsp)        ; all(hope(abandon(ye(who(enter(here))))))
+       (javascript +lsp +tide)        ; all(hope(abandon(ye(who(enter(here))))))
        (julia
         +lsp) ; a better, faster MATLAB
        ;;kotlin            ; a better, slicker Java(Script)
@@ -159,6 +159,8 @@
        (ocaml +lsp)             ; an objective camel
        (org                ; organize your plain life in plain text
         +roam2
+        +hugo
+        +noter
         +journal
         +pretty
         +pomodoro)
