@@ -959,6 +959,7 @@ Add Bookmark from URL
 ;; Rust configutation
 (setq rustic-lsp-server 'rust-analyzer)
 (setq lsp-rust-analyzer-store-path "/Users/Sheepsody/.cargo/bin/rust-analyzer")
+(add-to-list 'auto-mode-alist '("\\.rs\\'" . rustic-mode))
 
 (after! dap-mode
   (dap-register-debug-template "Rust::GDB Run Configuration"
@@ -1034,6 +1035,8 @@ Add Bookmark from URL
 ** Clang
 
 #+begin_src elisp
+;; Generating a *compile_commands.json* https://sarcasm.github.io/notes/dev/compilation-database.html
+
 ;; C++ Config
 (setq lsp-clients-clangd-args '("-j=3"
                                 "--background-index"
