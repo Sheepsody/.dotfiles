@@ -424,6 +424,7 @@ sudo ln -s /Library/TeX/texbin/dvipng /usr/local/bin/
                             :scheduled today
                             :order 1)))))
             (alltodo "" ((org-agenda-overriding-header "")
+                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline))
                          (org-super-agenda-groups
                           '(
                             (:discard (:scheduled future))
@@ -473,9 +474,6 @@ sudo ln -s /Library/TeX/texbin/dvipng /usr/local/bin/
                             (:name "Shopping"
                              :tag "shop"
                              :order 14)
-                            (:name "Courses"
-                             :tag "course"
-                             :order 15)
                             (:name "To do"
                              :todo "TODO"
                              :order 20)
