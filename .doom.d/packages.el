@@ -43,6 +43,4 @@
 
 (package! exec-path-from-shell)
 
-(package! chatgpt-shell)
-
 (package! catppuccin-theme)
